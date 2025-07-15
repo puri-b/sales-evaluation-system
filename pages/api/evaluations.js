@@ -77,13 +77,32 @@ export default async function handler(req, res) {
           );
         }
 
+        // ย้ายรูปภาพจาก temp_images ไปยัง evaluation_images
         if (images && images.length > 0) {
           for (const image of images) {
-            await client.query(
-              `INSERT INTO "X_SalesApp".evaluation_images (evaluation_id, image_url) 
-               VALUES ($1, $2)`,
-              [evaluationId, image.url] // ใช้ image.url ที่เป็น path จริง
+            // ดึงข้อมูลรูปจาก temp_images
+            const tempImageResult = await client.query(
+              'SELECT filename, mime_type, file_data FROM "X_SalesApp".temp_images WHERE id = $1',
+              [image.id]
             );
+
+            if (tempImageResult.rows.length > 0) {
+              const { filename, mime_type, file_data } = tempImageResult.rows[0];
+              
+              // บันทึกลง evaluation_images
+              await client.query(
+                `INSERT INTO "X_SalesApp".evaluation_images 
+                 (evaluation_id, filename, mime_type, file_data, created_at) 
+                 VALUES ($1, $2, $3, $4, NOW())`,
+                [evaluationId, filename, mime_type, file_data]
+              );
+
+              // ลบจาก temp_images
+              await client.query(
+                'DELETE FROM "X_SalesApp".temp_images WHERE id = $1',
+                [image.id]
+              );
+            }
           }
         }
 

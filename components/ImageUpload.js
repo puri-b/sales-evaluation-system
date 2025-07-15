@@ -26,10 +26,11 @@ export default function ImageUpload({ images, onImagesChange, onNext, onBack }) 
 
       if (result.success) {
         const newImages = result.files.map(file => ({
+          id: file.id,
           name: file.name,
-          filename: file.filename,
-          url: file.path,
-          size: file.size
+          mimetype: file.mimetype,
+          size: file.size,
+          url: `/api/image/${file.id}` // URL สำหรับแสดงรูป
         }));
 
         const allImages = [...uploadedImages, ...newImages];

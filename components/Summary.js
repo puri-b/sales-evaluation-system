@@ -27,7 +27,7 @@ export default function Summary({
         customer_name: serviceData.customer_name,
         scanning_data: selectedService === 'scanning' ? scanningData : null,
         data_entry_data: selectedService === 'data_entry' ? dataEntryData : null,
-        images: images.map(img => ({ name: img.name, url: img.url }))
+        images: images.map(img => ({ id: img.id, name: img.name, url: img.url })) 
       };
 
       console.log('Sending data:', requestData);

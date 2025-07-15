@@ -1,6 +1,6 @@
 import formidable from 'formidable';
 import fs from 'fs';
-import path from 'path';
+import { query } from '../../lib/db';
 
 export const config = {
   api: {
@@ -14,15 +14,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // สร้างโฟลเดอร์ uploads หากยังไม่มี
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
     const form = formidable({
-      uploadDir,
-      keepExtensions: true,
       maxFileSize: 5 * 1024 * 1024, // 5MB
       multiples: true,
     });
@@ -34,21 +26,27 @@ export default async function handler(req, res) {
 
     for (const file of fileArray) {
       if (file) {
-        const timestamp = Date.now();
-        const originalName = file.originalFilename || 'unknown';
-        const extension = path.extname(originalName);
-        const newFileName = `${timestamp}_${Math.random().toString(36).substring(2)}${extension}`;
-        const newPath = path.join(uploadDir, newFileName);
-
-        // ย้ายไฟล์ไปยังชื่อใหม่
-        fs.renameSync(file.filepath, newPath);
+        // อ่านไฟล์เป็น binary
+        const fileBuffer = fs.readFileSync(file.filepath);
+        const base64Data = fileBuffer.toString('base64');
+        
+        // บันทึกลงฐานข้อมูล
+        const result = await query(
+          `INSERT INTO "X_SalesApp".temp_images (filename, mime_type, file_data, created_at) 
+           VALUES ($1, $2, $3, NOW()) 
+           RETURNING id`,
+          [file.originalFilename, file.mimetype, base64Data]
+        );
 
         uploadedFiles.push({
-          name: originalName,
-          filename: newFileName,
-          path: `/uploads/${newFileName}`,
+          id: result.rows[0].id,
+          name: file.originalFilename,
+          mimetype: file.mimetype,
           size: file.size,
         });
+
+        // ลบไฟล์ temp
+        fs.unlinkSync(file.filepath);
       }
     }
 
@@ -61,8 +59,7 @@ export default async function handler(req, res) {
     console.error('Upload error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'เกิดข้อผิดพลาดในการอัพโหลด',
-      error: error.message 
+      message: 'เกิดข้อผิดพลาดในการอัพโหลด: ' + error.message 
     });
   }
 }

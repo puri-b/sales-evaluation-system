@@ -19,10 +19,19 @@ export default async function handler(req, res) {
 
       const evaluation = evaluationResult.rows[0];
 
+      // ดึงรูปภาพจาก evaluation_images
       const imagesResult = await query(
-        'SELECT * FROM "X_SalesApp".evaluation_images WHERE evaluation_id = $1',
+        'SELECT id, filename, mime_type FROM "X_SalesApp".evaluation_images WHERE evaluation_id = $1',
         [id]
       );
+
+      // สร้าง URL สำหรับแสดงรูป
+      const images = imagesResult.rows.map(img => ({
+        id: img.id,
+        filename: img.filename,
+        mime_type: img.mime_type,
+        image_url: `/api/evaluation-image/${img.id}`
+      }));
 
       let serviceDetails = null;
       if (evaluation.service_type === 'scanning') {
@@ -43,7 +52,7 @@ export default async function handler(req, res) {
         success: true,
         data: {
           ...evaluation,
-          images: imagesResult.rows,
+          images: images,
           service_details: serviceDetails
         }
       });
