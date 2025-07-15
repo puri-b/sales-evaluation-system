@@ -1,0 +1,56 @@
+@media print {
+  body {
+    font-size: 12px;
+    line-height: 1.4;
+    color: #000;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-page {
+    page-break-inside: avoid;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  table {
+    page-break-inside: avoid;
+  }
+
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  .print-header {
+    border-bottom: 2px solid #000;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+  }
+
+  .print-section {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+  }
+
+  .print-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 10px 0;
+  }
+
+  .print-grid-item {
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .print-grid-item strong {
+    font-weight: bold;
+  }
+}
