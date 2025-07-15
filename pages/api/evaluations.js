@@ -92,8 +92,8 @@ export default async function handler(req, res) {
               // บันทึกลง evaluation_images
               await client.query(
                 `INSERT INTO "X_SalesApp".evaluation_images 
-                 (evaluation_id, filename, mime_type, file_data, created_at) 
-                 VALUES ($1, $2, $3, $4, NOW())`,
+                 (evaluation_id, filename, mime_type, file_data) 
+                 VALUES ($1, $2, $3, $4)`,
                 [evaluationId, filename, mime_type, file_data]
               );
 
