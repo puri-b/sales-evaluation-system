@@ -33,8 +33,9 @@ export default async function handler(req, res) {
             `INSERT INTO "X_SalesApp".scanning_details 
              (evaluation_id, doc_count, doc_type, scan_mode, resolution_dpi, deadline, 
               return_stapled, indexing_rules, qa_process, revision_period_days, 
-              scan_location, is_pc_provided, is_desk_provided, electricity_payer)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+              scan_location, is_pc_provided, is_desk_provided, electricity_payer,
+              training_required, food_location)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
             [
               evaluationId,
               parseFloat(scanning_data.doc_count) || null,
@@ -49,7 +50,9 @@ export default async function handler(req, res) {
               scanning_data.scan_location || null,
               scanning_data.is_pc_provided || false,
               scanning_data.is_desk_provided || false,
-              scanning_data.electricity_payer || null
+              scanning_data.electricity_payer || null,
+              scanning_data.training_required || false,
+              scanning_data.food_location || null
             ]
           );
         }
@@ -59,8 +62,8 @@ export default async function handler(req, res) {
             `INSERT INTO "X_SalesApp".data_entry_details 
              (evaluation_id, software_used, data_complexity, deadline, data_volume, 
               data_type, entry_language, source_format, qa_process, revision_process, 
-              transport_responsibility)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+              transport_responsibility, training_required, food_location)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
             [
               evaluationId,
               data_entry_data.software_used || null,
@@ -72,15 +75,15 @@ export default async function handler(req, res) {
               data_entry_data.source_format || null,
               data_entry_data.qa_process || null,
               data_entry_data.revision_process || null,
-              data_entry_data.transport_responsibility || null
+              data_entry_data.transport_responsibility || null,
+              data_entry_data.training_required || false,
+              data_entry_data.food_location || null
             ]
           );
         }
 
-        // ย้ายรูปภาพจาก temp_images ไปยัง evaluation_images
         if (images && images.length > 0) {
           for (const image of images) {
-            // ดึงข้อมูลรูปจาก temp_images
             const tempImageResult = await client.query(
               'SELECT filename, mime_type, file_data FROM "X_SalesApp".temp_images WHERE id = $1',
               [image.id]
@@ -89,7 +92,6 @@ export default async function handler(req, res) {
             if (tempImageResult.rows.length > 0) {
               const { filename, mime_type, file_data } = tempImageResult.rows[0];
               
-              // บันทึกลง evaluation_images
               await client.query(
                 `INSERT INTO "X_SalesApp".evaluation_images 
                  (evaluation_id, filename, mime_type, file_data) 
@@ -97,7 +99,6 @@ export default async function handler(req, res) {
                 [evaluationId, filename, mime_type, file_data]
               );
 
-              // ลบจาก temp_images
               await client.query(
                 'DELETE FROM "X_SalesApp".temp_images WHERE id = $1',
                 [image.id]

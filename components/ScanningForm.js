@@ -16,7 +16,9 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
     scan_location: formData.scan_location || '',
     is_pc_provided: formData.is_pc_provided || false,
     is_desk_provided: formData.is_desk_provided || false,
-    electricity_payer: formData.electricity_payer || ''
+    electricity_payer: formData.electricity_payer || '',
+    training_required: formData.training_required || false,  // เพิ่มใหม่
+    food_location: formData.food_location || ''  // เพิ่มใหม่
   });
 
   const handleInputChange = (field, value) => {
@@ -325,6 +327,38 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
           </div>
         </>
       )}
+
+      {/* เพิ่มข้อมูลใหม่ */}
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input
+            type="checkbox"
+            checked={localData.training_required}
+            onChange={(e) => handleInputChange('training_required', e.target.checked)}
+            style={{ transform: 'scale(1.2)' }}
+          />
+          <span style={{ fontWeight: 'bold' }}>ต้องมีการอบรมก่อนเริ่มงานหรือไม่</span>
+        </label>
+      </div>
+
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+          บริเวณสถานที่ทำงานมีที่กินอาหารหรือไม่
+        </label>
+        <textarea
+          value={localData.food_location}
+          onChange={(e) => handleInputChange('food_location', e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px',
+            border: '1px solid #ddd',
+            borderRadius: '5px',
+            fontSize: '16px',
+            height: '60px'
+          }}
+          placeholder="ระบุสถานที่กินอาหาร เช่น โรงอาหาร ร้านอาหารใกล้เคียง หรือไม่มี"
+        />
+      </div>
 
       <div style={{ display: 'flex', gap: '10px', marginTop: '30px' }}>
         <button

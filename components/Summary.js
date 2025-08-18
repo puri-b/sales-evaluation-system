@@ -80,6 +80,8 @@ export default function Summary({
             <div><strong>การตรวจรับงาน:</strong> {scanningData.qa_process || '-'}</div>
             <div><strong>ระยะเวลาแก้ไข:</strong> {scanningData.revision_period_days ? `${scanningData.revision_period_days} วัน` : '-'}</div>
             <div><strong>พื้นที่สแกน:</strong> {scanningData.scan_location === 'customer_site' ? 'พื้นที่ลูกค้า' : scanningData.scan_location === 'our_office' ? 'สำนักงานเรา' : '-'}</div>
+            <div><strong>ต้องมีการอบรมก่อน:</strong> {scanningData.training_required ? 'ใช่' : 'ไม่'}</div>
+            <div><strong>สถานที่กินอาหาร:</strong> {scanningData.food_location || '-'}</div>
             {scanningData.scan_location === 'customer_site' && (
               <>
                 <div><strong>มีคอมพิวเตอร์:</strong> {scanningData.is_pc_provided ? 'ใช่' : 'ไม่'}</div>
@@ -105,6 +107,8 @@ export default function Summary({
             <div><strong>การตรวจรับงาน:</strong> {dataEntryData.qa_process || '-'}</div>
             <div><strong>การแก้ไขงาน:</strong> {dataEntryData.revision_process || '-'}</div>
             <div><strong>ผู้รับผิดชอบขนส่ง:</strong> {dataEntryData.transport_responsibility || '-'}</div>
+            <div><strong>ต้องมีการอบรมก่อน:</strong> {dataEntryData.training_required ? 'ใช่' : 'ไม่'}</div>
+            <div><strong>สถานที่กินอาหาร:</strong> {dataEntryData.food_location || '-'}</div>
           </div>
         </div>
       );
