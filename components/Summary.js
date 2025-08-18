@@ -27,7 +27,7 @@ export default function Summary({
         customer_name: serviceData.customer_name,
         scanning_data: selectedService === 'scanning' ? scanningData : null,
         data_entry_data: selectedService === 'data_entry' ? dataEntryData : null,
-        images: images.map(img => ({ id: img.id, name: img.name, url: img.url })) 
+        images: images.map(img => ({ id: img.id, name: img.name, url: img.url }))
       };
 
       console.log('Sending data:', requestData);
@@ -80,8 +80,6 @@ export default function Summary({
             <div><strong>การตรวจรับงาน:</strong> {scanningData.qa_process || '-'}</div>
             <div><strong>ระยะเวลาแก้ไข:</strong> {scanningData.revision_period_days ? `${scanningData.revision_period_days} วัน` : '-'}</div>
             <div><strong>พื้นที่สแกน:</strong> {scanningData.scan_location === 'customer_site' ? 'พื้นที่ลูกค้า' : scanningData.scan_location === 'our_office' ? 'สำนักงานเรา' : '-'}</div>
-            <div><strong>ต้องมีการอบรมก่อน:</strong> {scanningData.training_required ? 'ใช่' : 'ไม่'}</div>
-            <div><strong>สถานที่กินอาหาร:</strong> {scanningData.food_location || '-'}</div>
             {scanningData.scan_location === 'customer_site' && (
               <>
                 <div><strong>มีคอมพิวเตอร์:</strong> {scanningData.is_pc_provided ? 'ใช่' : 'ไม่'}</div>
@@ -89,6 +87,8 @@ export default function Summary({
                 <div><strong>ผู้รับผิดชอบค่าไฟ:</strong> {scanningData.electricity_payer === 'customer' ? 'ลูกค้า' : scanningData.electricity_payer === 'company' ? 'บริษัท' : '-'}</div>
               </>
             )}
+            <div><strong>ต้องมีการอบรมก่อน:</strong> {scanningData.training_required ? 'ใช่' : 'ไม่'}</div>
+            <div><strong>สถานที่กินอาหาร:</strong> {scanningData.food_location || '-'}</div>
           </div>
         </div>
       );
