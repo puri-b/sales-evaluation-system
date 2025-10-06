@@ -139,6 +139,7 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
           }}
         >
           <option value="">เลือกรูปแบบการสแกน</option>
+          <option value="black_white">ตามต้นฉบับ</option>
           <option value="color">สี</option>
           <option value="black_white">ขาวดำ</option>
         </select>
@@ -194,7 +195,7 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
             onChange={(e) => handleInputChange('return_stapled', e.target.checked)}
             style={{ transform: 'scale(1.2)' }}
           />
-          <span style={{ fontWeight: 'bold' }}>การคืนเอกสาร - กรดีเย็บแม็กมา ต้องแม็กคืนเหมือนเดิม</span>
+          <span style={{ fontWeight: 'bold' }}>การคืนเอกสาร - กรณีเย็บแม็กมา ต้องแม็กคืนเหมือนเดิม</span>
         </label>
       </div>
 
