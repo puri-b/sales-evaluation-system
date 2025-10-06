@@ -17,8 +17,8 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
     is_pc_provided: formData.is_pc_provided || false,
     is_desk_provided: formData.is_desk_provided || false,
     electricity_payer: formData.electricity_payer || '',
-    training_required: formData.training_required || false,  // เพิ่มใหม่
-    food_location: formData.food_location || ''  // เพิ่มใหม่
+    training_required: formData.training_required || false,
+    food_location: formData.food_location || ''
   });
 
   const handleInputChange = (field, value) => {
@@ -194,7 +194,7 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
             onChange={(e) => handleInputChange('return_stapled', e.target.checked)}
             style={{ transform: 'scale(1.2)' }}
           />
-          <span style={{ fontWeight: 'bold' }}>การคืนเอกสาร - กรณีเย็บแม็กมา ต้องแม็กคืนเหมือนเดิม</span>
+          <span style={{ fontWeight: 'bold' }}>การคืนเอกสาร - กรดีเย็บแม็กมา ต้องแม็กคืนเหมือนเดิม</span>
         </label>
       </div>
 
@@ -221,7 +221,7 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
         <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
           การตรวจรับงาน
         </label>
-        <select
+        <textarea
           value={localData.qa_process}
           onChange={(e) => handleInputChange('qa_process', e.target.value)}
           style={{
@@ -229,14 +229,11 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
             padding: '10px',
             border: '1px solid #ddd',
             borderRadius: '5px',
-            fontSize: '16px'
+            fontSize: '16px',
+            height: '100px'
           }}
-        >
-          <option value="">เลือกวิธีการตรวจรับงาน</option>
-          <option value="manual">ตรวจสอบด้วยตนเอง</option>
-          <option value="auto">ตรวจสอบอัตโนมัติ</option>
-          <option value="both">ตรวจสอบทั้งสองแบบ</option>
-        </select>
+          placeholder="ระบุรายละเอียดการตรวจรับงาน เช่น วิธีการตรวจสอบคุณภาพ, เกณฑ์การยอมรับ, ขั้นตอนการรับมอบงาน ฯลฯ"
+        />
       </div>
 
       <div style={{ marginBottom: '20px' }}>
@@ -328,7 +325,6 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
         </>
       )}
 
-      {/* เพิ่มข้อมูลใหม่ */}
       <div style={{ marginBottom: '20px' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <input
