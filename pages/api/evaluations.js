@@ -1,5 +1,31 @@
 import { query, pool } from '../../lib/db';
 
+const getDisplayDocType = (item) => {
+  if (!item) return '';
+  if (item.doc_type === 'อื่นๆ') return item.custom_doc_type || 'อื่นๆ';
+  return item.doc_type || '';
+};
+
+const buildScanningDocumentSummary = (scanningData) => {
+  if (Array.isArray(scanningData?.document_sizes) && scanningData.document_sizes.length > 0) {
+    const validItems = scanningData.document_sizes.filter((item) => getDisplayDocType(item) && item.doc_count);
+    const totalCount = validItems.reduce((sum, item) => sum + (parseFloat(item.doc_count) || 0), 0);
+    const docTypeSummary = validItems
+      .map((item) => `${getDisplayDocType(item)}: ${item.doc_count}`)
+      .join(', ');
+
+    return {
+      doc_count: totalCount > 0 ? totalCount : null,
+      doc_type: docTypeSummary || null
+    };
+  }
+
+  return {
+    doc_count: parseFloat(scanningData?.doc_count) || null,
+    doc_type: scanningData?.doc_type || null
+  };
+};
+
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
@@ -29,6 +55,8 @@ export default async function handler(req, res) {
         const evaluationId = evaluationResult.rows[0].id;
 
         if (service_type === 'scanning' && scanning_data) {
+          const scanningDocumentSummary = buildScanningDocumentSummary(scanning_data);
+
           await client.query(
             `INSERT INTO "X_SalesApp".scanning_details 
              (evaluation_id, doc_count, doc_type, scan_mode, resolution_dpi, deadline, 
@@ -38,8 +66,8 @@ export default async function handler(req, res) {
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
             [
               evaluationId,
-              parseFloat(scanning_data.doc_count) || null,
-              scanning_data.doc_type || null,
+              scanningDocumentSummary.doc_count,
+              scanningDocumentSummary.doc_type,
               scanning_data.scan_mode || null,
               parseFloat(scanning_data.resolution_dpi) || null,
               parseFloat(scanning_data.deadline) || null,

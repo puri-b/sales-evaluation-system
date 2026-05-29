@@ -44,6 +44,13 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
     return serviceType === 'scanning' ? 'บริการสแกนเอกสาร' : 'บริการบันทึกข้อมูล';
   };
 
+  const getScanModeLabel = (scanMode) => {
+    if (scanMode === 'original') return 'ตามต้นฉบับ';
+    if (scanMode === 'color') return 'สี';
+    if (scanMode === 'black_white') return 'ขาวดำ';
+    return '-';
+  };
+
   const openImageModal = (imageUrl) => {
     setSelectedImage(imageUrl);
   };
@@ -68,9 +75,9 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
             padding: '15px',
             borderRadius: '8px'
           }}>
-            <div><strong>จำนวนเอกสาร:</strong> {details.doc_count || '-'}</div>
-            <div><strong>ประเภทเอกสาร:</strong> {details.doc_type || '-'}</div>
-            <div><strong>รูปแบบการสแกน:</strong> {details.scan_mode === 'color' ? 'สี' : details.scan_mode === 'black_white' ? 'ขาวดำ' : '-'}</div>
+            <div><strong>จำนวนเอกสารรวม:</strong> {details.doc_count || '-'}</div>
+            <div><strong>ขนาดเอกสาร:</strong> {details.doc_type || '-'}</div>
+            <div><strong>รูปแบบการสแกน:</strong> {getScanModeLabel(details.scan_mode)}</div>
             <div><strong>ความละเอียด:</strong> {details.resolution_dpi ? `${details.resolution_dpi} DPI` : '-'}</div>
             <div><strong>ระยะเวลาส่งงาน:</strong> {details.deadline ? `${details.deadline} วัน` : '-'}</div>
             <div><strong>คืนเอกสารแม็กเหมือนเดิม:</strong> {details.return_stapled ? 'ใช่' : 'ไม่'}</div>

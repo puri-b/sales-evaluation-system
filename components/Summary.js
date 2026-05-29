@@ -64,15 +64,59 @@ export default function Summary({
     setSelectedImage(null);
   };
 
+  const getScanModeLabel = (scanMode) => {
+    if (scanMode === 'original') return 'ตามต้นฉบับ';
+    if (scanMode === 'color') return 'สี';
+    if (scanMode === 'black_white') return 'ขาวดำ';
+    return '-';
+  };
+
+  const renderDocumentSizes = () => {
+    if (Array.isArray(scanningData.document_sizes) && scanningData.document_sizes.length > 0) {
+      const validItems = scanningData.document_sizes.filter((item) => item.doc_type && item.doc_count);
+
+      if (validItems.length > 0) {
+        return (
+          <div style={{ gridColumn: '1 / -1' }}>
+            <strong>ขนาดเอกสาร:</strong>
+            <div style={{ marginTop: '8px', border: '1px solid #ddd', borderRadius: '8px', overflow: 'hidden' }}>
+              {validItems.map((item, index) => {
+                const displayType = item.doc_type === 'อื่นๆ' ? item.custom_doc_type || 'อื่นๆ' : item.doc_type;
+                return (
+                  <div
+                    key={index}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: '10px',
+                      padding: '8px 10px',
+                      backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8f9fa',
+                      borderBottom: index === validItems.length - 1 ? 'none' : '1px solid #ddd'
+                    }}
+                  >
+                    <span>{displayType}</span>
+                    <span>{item.doc_count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      }
+    }
+
+    return <div><strong>ประเภทเอกสาร:</strong> {scanningData.doc_type || '-'}</div>;
+  };
+
   const renderServiceData = () => {
     if (selectedService === 'scanning') {
       return (
         <div>
           <h4 style={{ marginBottom: '10px', color: '#007bff' }}>ข้อมูลบริการสแกนเอกสาร</h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '10px' }}>
-            <div><strong>จำนวนเอกสาร:</strong> {scanningData.doc_count || '-'}</div>
-            <div><strong>ประเภทเอกสาร:</strong> {scanningData.doc_type || '-'}</div>
-            <div><strong>รูปแบบการสแกน:</strong> {scanningData.scan_mode === 'color' ? 'สี' : scanningData.scan_mode === 'black_white' ? 'ขาวดำ' : '-'}</div>
+            <div><strong>จำนวนเอกสารรวม:</strong> {scanningData.doc_count || '-'}</div>
+            {renderDocumentSizes()}
+            <div><strong>รูปแบบการสแกน:</strong> {getScanModeLabel(scanningData.scan_mode)}</div>
             <div><strong>ความละเอียด:</strong> {scanningData.resolution_dpi ? `${scanningData.resolution_dpi} DPI` : '-'}</div>
             <div><strong>ระยะเวลาส่งงาน:</strong> {scanningData.deadline ? `${scanningData.deadline} วัน` : '-'}</div>
             <div><strong>คืนเอกสารแม็กเหมือนเดิม:</strong> {scanningData.return_stapled ? 'ใช่' : 'ไม่'}</div>
