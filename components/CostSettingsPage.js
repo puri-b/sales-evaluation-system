@@ -101,7 +101,7 @@ export default function CostSettingsPage({ onBack }) {
       <div style={{ position: 'relative' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
           <div style={glassTitlePill}>
-            <span style={{ fontSize: '20px' }}>⚙️</span>
+            <span style={{ fontSize: '20px' }}></span>
             <h2 style={{ color: '#1f2937', margin: 0, fontSize: '17px', fontWeight: 700 }}>ตั้งค่าอัตราต้นทุน (Breakdown Cost)</h2>
           </div>
           <button
