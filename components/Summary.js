@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { glassCard, glassButton, buttonColors, hoverLift, hoverReset, glassTintDanger } from '../styles/glass';
 
 export default function Summary({ 
   selectedService, 
@@ -79,7 +80,7 @@ export default function Summary({
         return (
           <div style={{ gridColumn: '1 / -1' }}>
             <strong>ขนาดเอกสาร:</strong>
-            <div style={{ marginTop: '8px', border: '1px solid #ddd', borderRadius: '8px', overflow: 'hidden' }}>
+            <div style={{ marginTop: '8px', border: '1px solid rgba(255,255,255,0.7)', borderRadius: '12px', overflow: 'hidden', background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
               {validItems.map((item, index) => {
                 const displayType = item.doc_type === 'อื่นๆ' ? item.custom_doc_type || 'อื่นๆ' : item.doc_type;
                 return (
@@ -90,8 +91,8 @@ export default function Summary({
                       gridTemplateColumns: '1fr 1fr',
                       gap: '10px',
                       padding: '8px 10px',
-                      backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8f9fa',
-                      borderBottom: index === validItems.length - 1 ? 'none' : '1px solid #ddd'
+                      backgroundColor: index % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.4)',
+                      borderBottom: index === validItems.length - 1 ? 'none' : '1px solid rgba(0,0,0,0.06)'
                     }}
                   >
                     <span>{displayType}</span>
@@ -112,7 +113,7 @@ export default function Summary({
     if (selectedService === 'scanning') {
       return (
         <div>
-          <h4 style={{ marginBottom: '10px', color: '#007bff' }}>ข้อมูลบริการสแกนเอกสาร</h4>
+          <h4 style={{ marginBottom: '10px', color: '#4338ca' }}>ข้อมูลบริการสแกนเอกสาร</h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '10px' }}>
             <div><strong>จำนวนเอกสารรวม:</strong> {scanningData.doc_count || '-'}</div>
             {renderDocumentSizes()}
@@ -139,7 +140,7 @@ export default function Summary({
     } else if (selectedService === 'data_entry') {
       return (
         <div>
-          <h4 style={{ marginBottom: '10px', color: '#007bff' }}>ข้อมูลบริการบันทึกข้อมูล</h4>
+          <h4 style={{ marginBottom: '10px', color: '#4338ca' }}>ข้อมูลบริการบันทึกข้อมูล</h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '10px' }}>
             <div><strong>โปรแกรมที่ใช้:</strong> {dataEntryData.software_used || '-'}</div>
             <div><strong>ลักษณะข้อมูล:</strong> {dataEntryData.data_complexity || '-'}</div>
@@ -161,30 +162,18 @@ export default function Summary({
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <h3 style={{ marginBottom: '20px', color: '#333', textAlign: 'center' }}>
+      <h3 style={{ marginBottom: '20px', color: '#1f2937', textAlign: 'center' }}>
         สรุปข้อมูลการประเมิน
       </h3>
       
       {error && (
-        <div style={{
-          backgroundColor: '#f8d7da',
-          color: '#721c24',
-          padding: '10px',
-          borderRadius: '5px',
-          marginBottom: '20px',
-          border: '1px solid #f5c6cb'
-        }}>
+        <div style={{ ...glassTintDanger, marginBottom: '20px' }}>
           {error}
         </div>
       )}
       
-      <div style={{ 
-        backgroundColor: '#f8f9fa', 
-        padding: '20px', 
-        borderRadius: '8px', 
-        marginBottom: '20px' 
-      }}>
-        <h4 style={{ marginBottom: '10px', color: '#007bff' }}>ข้อมูลทั่วไป</h4>
+      <div style={glassCard}>
+        <h4 style={{ marginTop: 0, marginBottom: '10px', color: '#4338ca' }}>ข้อมูลทั่วไป</h4>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '10px' }}>
           <div><strong>บริการที่เลือก:</strong> {selectedService === 'scanning' ? 'บริการสแกนเอกสาร' : 'บริการบันทึกข้อมูล'}</div>
           <div><strong>วันที่ประเมิน:</strong> {evaluationDate}</div>
@@ -193,24 +182,13 @@ export default function Summary({
         </div>
       </div>
 
-      <div style={{ 
-        backgroundColor: '#ffffff', 
-        padding: '20px', 
-        borderRadius: '8px', 
-        marginBottom: '20px',
-        border: '1px solid #e0e0e0'
-      }}>
+      <div style={glassCard}>
         {renderServiceData()}
       </div>
 
       {images.length > 0 && (
-        <div style={{ 
-          backgroundColor: '#f8f9fa', 
-          padding: '20px', 
-          borderRadius: '8px', 
-          marginBottom: '20px' 
-        }}>
-          <h4 style={{ marginBottom: '10px', color: '#007bff' }}>รูปภาพประกอบ ({images.length} รูป)</h4>
+        <div style={glassCard}>
+          <h4 style={{ marginTop: 0, marginBottom: '10px', color: '#4338ca' }}>รูปภาพประกอบ ({images.length} รูป)</h4>
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', 
@@ -221,10 +199,12 @@ export default function Summary({
                 key={index} 
                 style={{ 
                   textAlign: 'center',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.7)',
+                  borderRadius: '12px',
                   padding: '10px',
-                  backgroundColor: 'white'
+                  background: 'rgba(255,255,255,0.55)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
                 }}
               >
                 <img
@@ -234,8 +214,7 @@ export default function Summary({
                     width: '100%',
                     height: '120px',
                     objectFit: 'cover',
-                    borderRadius: '5px',
-                    border: '1px solid #ddd',
+                    borderRadius: '8px',
                     cursor: 'pointer',
                     transition: 'transform 0.2s ease'
                   }}
@@ -243,7 +222,7 @@ export default function Summary({
                   onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
                   onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
                 />
-                <p style={{ fontSize: '12px', color: '#666', marginTop: '5px', wordBreak: 'break-all' }}>
+                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '5px', wordBreak: 'break-all' }}>
                   {image.name}
                 </p>
               </div>
@@ -256,33 +235,18 @@ export default function Summary({
         <button
           onClick={onBack}
           disabled={saving}
-          style={{
-            flex: '1',
-            padding: '15px',
-            backgroundColor: saving ? '#ccc' : '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            cursor: saving ? 'not-allowed' : 'pointer'
-          }}
+          style={{ ...glassButton(...buttonColors.neutral), flex: '1', opacity: saving ? 0.6 : 1, cursor: saving ? 'not-allowed' : 'pointer' }}
+          onMouseOver={saving ? undefined : hoverLift}
+          onMouseOut={saving ? undefined : hoverReset}
         >
           ย้อนกลับ
         </button>
         <button
           onClick={handleSave}
           disabled={saving}
-          style={{
-            flex: '2',
-            padding: '15px',
-            backgroundColor: saving ? '#ccc' : '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            cursor: saving ? 'not-allowed' : 'pointer'
-          }}
+          style={{ ...glassButton(...buttonColors.success), flex: '2', fontSize: '16px', opacity: saving ? 0.6 : 1, cursor: saving ? 'not-allowed' : 'pointer' }}
+          onMouseOver={saving ? undefined : hoverLift}
+          onMouseOut={saving ? undefined : hoverReset}
         >
           {saving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
         </button>
@@ -310,8 +274,11 @@ export default function Summary({
               position: 'relative',
               maxWidth: '90%',
               maxHeight: '90%',
-              backgroundColor: 'white',
-              borderRadius: '8px',
+              background: 'rgba(255,255,255,0.85)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255,255,255,0.6)',
               padding: '20px'
             }}
             onClick={(e) => e.stopPropagation()}

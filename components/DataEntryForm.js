@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { glassInput, glassTextarea, glassButton, buttonColors, hoverLift, hoverReset } from '../styles/glass';
 
 export default function DataEntryForm({ formData, onFormChange, onNext, onBack }) {
   const [localData, setLocalData] = useState({
@@ -48,13 +49,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
           type="text"
           value={localData.salesperson_name}
           onChange={(e) => handleInputChange('salesperson_name', e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            fontSize: '16px'
-          }}
+          style={glassInput}
           placeholder="กรอกชื่อพนักงานขาย"
         />
       </div>
@@ -67,13 +62,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
           type="text"
           value={localData.customer_name}
           onChange={(e) => handleInputChange('customer_name', e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            fontSize: '16px'
-          }}
+          style={glassInput}
           placeholder="กรอกชื่อลูกค้า"
         />
       </div>
@@ -85,13 +74,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
         <select
           value={localData.software_used}
           onChange={(e) => handleInputChange('software_used', e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            fontSize: '16px'
-          }}
+          style={glassInput}
         >
           <option value="">เลือกโปรแกรม</option>
           <option value="Excel">Excel</option>
@@ -110,13 +93,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
         <select
           value={localData.data_complexity}
           onChange={(e) => handleInputChange('data_complexity', e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            fontSize: '16px'
-          }}
+          style={glassInput}
         >
           <option value="">เลือกลักษณะข้อมูล</option>
           <option value="ง่าย">ง่าย - มองเห็นได้ชัดเจน</option>
@@ -133,13 +110,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
           type="number"
           value={localData.deadline}
           onChange={(e) => handleInputChange('deadline', e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            fontSize: '16px'
-          }}
+          style={glassInput}
           placeholder="กรอกจำนวนวัน"
         />
       </div>
@@ -152,13 +123,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
           type="number"
           value={localData.data_volume}
           onChange={(e) => handleInputChange('data_volume', e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            fontSize: '16px'
-          }}
+          style={glassInput}
           placeholder="กรอกปริมาณข้อมูล (จำนวนหน้า/รายการ)"
         />
       </div>
@@ -170,13 +135,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
         <select
           value={localData.data_type}
           onChange={(e) => handleInputChange('data_type', e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            fontSize: '16px'
-          }}
+          style={glassInput}
         >
           <option value="">เลือกประเภทข้อมูล</option>
           <option value="ข้อความ">ข้อความ</option>
@@ -195,13 +154,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
         <select
           value={localData.entry_language}
           onChange={(e) => handleInputChange('entry_language', e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            fontSize: '16px'
-          }}
+          style={glassInput}
         >
           <option value="">เลือกภาษา</option>
           <option value="ไทย">ไทย</option>
@@ -220,13 +173,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
         <select
           value={localData.source_format}
           onChange={(e) => handleInputChange('source_format', e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            fontSize: '16px'
-          }}
+          style={glassInput}
         >
           <option value="">เลือกรูปแบบเอกสาร</option>
           <option value="กระดาษ">กระดาษ</option>
@@ -243,13 +190,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
         <select
           value={localData.qa_process}
           onChange={(e) => handleInputChange('qa_process', e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            fontSize: '16px'
-          }}
+          style={glassInput}
         >
           <option value="">เลือกวิธีการตรวจรับงาน</option>
           <option value="ตรวจสอบทั้งหมด">ตรวจสอบทั้งหมด</option>
@@ -265,14 +206,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
         <textarea
           value={localData.revision_process}
           onChange={(e) => handleInputChange('revision_process', e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            fontSize: '16px',
-            height: '80px'
-          }}
+          style={{ ...glassTextarea, height: '80px' }}
           placeholder="ระบุกระบวนการแก้ไขงาน"
         />
       </div>
@@ -284,13 +218,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
         <select
           value={localData.transport_responsibility}
           onChange={(e) => handleInputChange('transport_responsibility', e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            fontSize: '16px'
-          }}
+          style={glassInput}
         >
           <option value="">เลือกผู้รับผิดชอบ</option>
           <option value="ลูกค้า">ลูกค้า</option>
@@ -306,7 +234,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
             type="checkbox"
             checked={localData.training_required}
             onChange={(e) => handleInputChange('training_required', e.target.checked)}
-            style={{ transform: 'scale(1.2)' }}
+            style={{ transform: 'scale(1.3)', accentColor: '#6366f1' }}
           />
           <span style={{ fontWeight: 'bold' }}>ต้องมีการอบรมก่อนเริ่มงานหรือไม่</span>
         </label>
@@ -319,14 +247,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
         <textarea
           value={localData.food_location}
           onChange={(e) => handleInputChange('food_location', e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '5px',
-            fontSize: '16px',
-            height: '60px'
-          }}
+          style={{ ...glassTextarea, height: '60px' }}
           placeholder="ระบุสถานที่กินอาหาร เช่น โรงอาหาร ร้านอาหารใกล้เคียง หรือไม่มี"
         />
       </div>
@@ -334,31 +255,17 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
       <div style={{ display: 'flex', gap: '10px', marginTop: '30px' }}>
         <button
           onClick={onBack}
-          style={{
-            flex: '1',
-            padding: '15px',
-            backgroundColor: '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            cursor: 'pointer'
-          }}
+          style={{ ...glassButton(...buttonColors.neutral), flex: '1' }}
+          onMouseOver={hoverLift}
+          onMouseOut={hoverReset}
         >
           ย้อนกลับ
         </button>
         <button
           onClick={handleSubmit}
-          style={{
-            flex: '1',
-            padding: '15px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            cursor: 'pointer'
-          }}
+          style={{ ...glassButton(...buttonColors.primary), flex: '1' }}
+          onMouseOver={hoverLift}
+          onMouseOut={hoverReset}
         >
           ถัดไป
         </button>

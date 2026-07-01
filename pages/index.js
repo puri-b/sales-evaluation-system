@@ -8,6 +8,8 @@ import Summary from '../components/Summary';
 import SaveSuccess from '../components/SaveSuccess';
 import EvaluationList from '../components/EvaluationList';
 import EvaluationDetail from '../components/EvaluationDetail';
+import CostSettingsPage from '../components/CostSettingsPage';
+import { glassPanel, glassCard, glassButton, buttonColors, hoverLift, hoverReset, GlassBlobs } from '../styles/glass';
 
 export default function Home() {
   const [selectedService, setSelectedService] = useState('');
@@ -90,6 +92,19 @@ export default function Home() {
     setSelectedEvaluationId(null);
   };
 
+  // แสดงหน้าตั้งค่าอัตราต้นทุน
+  if (currentView === 'settings') {
+    return (
+      <div style={{
+        padding: '20px',
+        maxWidth: '900px',
+        margin: '0 auto',
+      }}>
+        <CostSettingsPage onBack={handleBackToMain} />
+      </div>
+    );
+  }
+
   // แสดงหน้าแสดงข้อมูลทั้งหมด
   if (currentView === 'list') {
     return (
@@ -97,18 +112,15 @@ export default function Home() {
         padding: '20px', 
         maxWidth: '1200px', 
         margin: '0 auto',
-        fontFamily: 'Arial, sans-serif'
       }}>
-        <div style={{
-          backgroundColor: 'white',
-          padding: '30px',
-          borderRadius: '12px',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-        }}>
-          <EvaluationList 
-            onBack={handleBackToMain}
-            onViewDetail={handleViewDetail}
-          />
+        <div style={{ ...glassPanel }}>
+          <GlassBlobs variant="reverse" />
+          <div style={{ position: 'relative' }}>
+            <EvaluationList 
+              onBack={handleBackToMain}
+              onViewDetail={handleViewDetail}
+            />
+          </div>
         </div>
       </div>
     );
@@ -121,18 +133,15 @@ export default function Home() {
         padding: '20px', 
         maxWidth: '1200px', 
         margin: '0 auto',
-        fontFamily: 'Arial, sans-serif'
       }}>
-        <div style={{
-          backgroundColor: 'white',
-          padding: '30px',
-          borderRadius: '12px',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-        }}>
-          <EvaluationDetail 
-            evaluationId={selectedEvaluationId}
-            onBack={handleBackToList}
-          />
+        <div style={{ ...glassPanel }}>
+          <GlassBlobs />
+          <div style={{ position: 'relative' }}>
+            <EvaluationDetail 
+              evaluationId={selectedEvaluationId}
+              onBack={handleBackToList}
+            />
+          </div>
         </div>
       </div>
     );
@@ -155,37 +164,29 @@ export default function Home() {
             <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
               <button
                 onClick={handleViewAll}
-                style={{
-                  flex: '1',
-                  padding: '15px',
-                  backgroundColor: '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer'
-                }}
+                style={{ ...glassButton(...buttonColors.success), flex: '1' }}
+                onMouseOver={hoverLift}
+                onMouseOut={hoverReset}
               >
                 ดูข้อมูลทั้งหมด
               </button>
               <button
                 onClick={handleServiceNext}
-                style={{
-                  flex: '2',
-                  padding: '15px',
-                  backgroundColor: '#007bff',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer'
-                }}
+                style={{ ...glassButton(...buttonColors.primary), flex: '2' }}
+                onMouseOver={hoverLift}
+                onMouseOut={hoverReset}
               >
                 เริ่มประเมินใหม่
               </button>
             </div>
+            <button
+              onClick={() => setCurrentView('settings')}
+              style={{ ...glassButton(...buttonColors.neutral), width: '100%', marginTop: '10px', opacity: 0.85 }}
+              onMouseOver={hoverLift}
+              onMouseOut={hoverReset}
+            >
+              ⚙️ ตั้งค่าอัตราต้นทุน (Breakdown Cost)
+            </button>
           </div>
         );
 
@@ -253,65 +254,63 @@ export default function Home() {
       padding: '20px', 
       maxWidth: '800px', 
       margin: '0 auto',
-      fontFamily: 'Arial, sans-serif'
     }}>
-      <div style={{
-        backgroundColor: 'white',
-        padding: '30px',
-        borderRadius: '12px',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-      }}>
-        <h1 style={{ 
-          textAlign: 'center', 
-          marginBottom: '30px',
-          color: '#333',
-          fontSize: '24px'
-        }}>
-          ระบบบันทึกข้อมูล Sales
-        </h1>
-
-        {/* Progress Bar */}
-        {currentStep < 5 && (
-          <div style={{ 
-            marginBottom: '30px',
-            padding: '10px',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '8px'
+      <div style={glassPanel}>
+        <GlassBlobs />
+        <div style={{ position: 'relative' }}>
+          <h1 style={{ 
+            textAlign: 'center', 
+            marginBottom: '26px',
+            color: '#1f2937',
+            fontSize: '24px'
           }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <span style={{ 
-                color: currentStep >= 1 ? '#007bff' : '#6c757d',
-                fontWeight: currentStep >= 1 ? 'bold' : 'normal'
-              }}>
-                1. เลือกบริการ
-              </span>
-              <span style={{ 
-                color: currentStep >= 2 ? '#007bff' : '#6c757d',
-                fontWeight: currentStep >= 2 ? 'bold' : 'normal'
-              }}>
-                2. กรอกข้อมูล
-              </span>
-              <span style={{ 
-                color: currentStep >= 3 ? '#007bff' : '#6c757d',
-                fontWeight: currentStep >= 3 ? 'bold' : 'normal'
-              }}>
-                3. แนบรูปภาพ
-              </span>
-              <span style={{ 
-                color: currentStep >= 4 ? '#007bff' : '#6c757d',
-                fontWeight: currentStep >= 4 ? 'bold' : 'normal'
-              }}>
-                4. สรุปผล
-              </span>
-            </div>
-          </div>
-        )}
+            ระบบบันทึกข้อมูล Sales
+          </h1>
 
-        {renderCurrentStep()}
+          {/* Progress Bar */}
+          {currentStep < 5 && (
+            <div style={{ ...glassCard, padding: '14px 16px', marginBottom: '26px' }}>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '6px',
+              }}>
+                <span style={{ 
+                  color: currentStep >= 1 ? '#4338ca' : '#9ca3af',
+                  fontWeight: currentStep >= 1 ? 'bold' : 'normal',
+                  fontSize: '13px',
+                }}>
+                  1. เลือกบริการ
+                </span>
+                <span style={{ 
+                  color: currentStep >= 2 ? '#4338ca' : '#9ca3af',
+                  fontWeight: currentStep >= 2 ? 'bold' : 'normal',
+                  fontSize: '13px',
+                }}>
+                  2. กรอกข้อมูล
+                </span>
+                <span style={{ 
+                  color: currentStep >= 3 ? '#4338ca' : '#9ca3af',
+                  fontWeight: currentStep >= 3 ? 'bold' : 'normal',
+                  fontSize: '13px',
+                }}>
+                  3. แนบรูปภาพ
+                </span>
+                <span style={{ 
+                  color: currentStep >= 4 ? '#4338ca' : '#9ca3af',
+                  fontWeight: currentStep >= 4 ? 'bold' : 'normal',
+                  fontSize: '13px',
+                }}>
+                  4. สรุปผล
+                </span>
+              </div>
+            </div>
+          )}
+
+          {renderCurrentStep()}
+        </div>
       </div>
     </div>
   );

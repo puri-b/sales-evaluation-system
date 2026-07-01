@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { glassCard, glassFileInput, glassButton, buttonColors, hoverLift, hoverReset, glassTintInfo } from '../styles/glass';
 
 export default function ImageUpload({ images, onImagesChange, onNext, onBack }) {
   const [uploadedImages, setUploadedImages] = useState(images || []);
@@ -6,11 +7,11 @@ export default function ImageUpload({ images, onImagesChange, onNext, onBack }) 
 
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);
-    
+
     if (files.length === 0) return;
 
     setUploading(true);
-    
+
     try {
       const formData = new FormData();
       files.forEach(file => {
@@ -63,10 +64,10 @@ export default function ImageUpload({ images, onImagesChange, onNext, onBack }) 
 
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-      <h3 style={{ marginBottom: '20px', color: '#333' }}>แนบรูปภาพประกอบ</h3>
-      
-      <div style={{ marginBottom: '20px' }}>
-        <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
+      <h3 style={{ marginBottom: '20px', color: '#1f2937' }}>แนบรูปภาพประกอบ</h3>
+
+      <div style={glassCard}>
+        <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold', color: '#1f2937' }}>
           เลือกรูปภาพ (สามารถเลือกได้หลายรูป)
         </label>
         <input
@@ -75,49 +76,40 @@ export default function ImageUpload({ images, onImagesChange, onNext, onBack }) 
           multiple
           onChange={handleFileChange}
           disabled={uploading}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '2px dashed #ddd',
-            borderRadius: '8px',
-            fontSize: '16px',
-            cursor: uploading ? 'not-allowed' : 'pointer',
-            backgroundColor: uploading ? '#f5f5f5' : '#f9f9f9'
-          }}
+          style={{ ...glassFileInput, cursor: uploading ? 'not-allowed' : 'pointer', opacity: uploading ? 0.6 : 1 }}
         />
-        <p style={{ 
-          fontSize: '14px', 
-          color: '#666', 
-          marginTop: '5px' 
-        }}>
+        <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px', marginBottom: 0 }}>
           รองรับไฟล์: JPG, PNG, GIF (ขนาดไฟล์ไม่เกิน 5MB ต่อรูป)
         </p>
         {uploading && (
-          <p style={{ color: '#007bff', marginTop: '10px' }}>
+          <p style={{ color: '#4338ca', marginTop: '10px', marginBottom: 0 }}>
             กำลังอัพโหลด...
           </p>
         )}
       </div>
 
       {uploadedImages.length > 0 && (
-        <div style={{ marginBottom: '20px' }}>
-          <h4 style={{ marginBottom: '10px', color: '#333' }}>
+        <div style={glassCard}>
+          <h4 style={{ marginTop: 0, marginBottom: '12px', color: '#1f2937' }}>
             รูปภาพที่แนบ ({uploadedImages.length} รูป)
           </h4>
-          <div style={{ 
-            display: 'grid', 
+          <div style={{
+            display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
             gap: '15px'
           }}>
             {uploadedImages.map((image, index) => (
-              <div 
+              <div
                 key={index}
                 style={{
                   position: 'relative',
-                  border: '2px solid #ddd',
-                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.7)',
+                  borderRadius: '14px',
                   overflow: 'hidden',
-                  backgroundColor: 'white'
+                  background: 'rgba(255,255,255,0.6)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  boxShadow: '0 4px 14px rgba(31,38,135,0.08)',
                 }}
               >
                 <img
@@ -131,19 +123,20 @@ export default function ImageUpload({ images, onImagesChange, onNext, onBack }) 
                 />
                 <div style={{
                   position: 'absolute',
-                  top: '5px',
-                  right: '5px',
-                  backgroundColor: 'rgba(255,0,0,0.8)',
+                  top: '6px',
+                  right: '6px',
+                  background: 'linear-gradient(135deg, #f87171, #dc2626)',
                   color: 'white',
-                  border: 'none',
+                  border: '1px solid rgba(255,255,255,0.5)',
                   borderRadius: '50%',
-                  width: '25px',
-                  height: '25px',
+                  width: '26px',
+                  height: '26px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '14px'
+                  fontSize: '14px',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
                 }}
                 onClick={() => removeImage(index)}
                 >
@@ -152,7 +145,7 @@ export default function ImageUpload({ images, onImagesChange, onNext, onBack }) 
                 <div style={{
                   padding: '8px',
                   fontSize: '12px',
-                  color: '#666',
+                  color: '#6b7280',
                   textAlign: 'center',
                   wordBreak: 'break-all'
                 }}>
@@ -164,20 +157,11 @@ export default function ImageUpload({ images, onImagesChange, onNext, onBack }) 
         </div>
       )}
 
-      <div style={{ 
-        padding: '15px',
-        backgroundColor: '#e3f2fd',
-        borderRadius: '8px',
-        marginBottom: '20px'
-      }}>
-        <h4 style={{ marginBottom: '10px', color: '#1976d2' }}>
+      <div style={glassTintInfo}>
+        <h4 style={{ marginTop: 0, marginBottom: '10px' }}>
           💡 คำแนะนำการถ่ายรูป
         </h4>
-        <ul style={{ 
-          margin: '0',
-          paddingLeft: '20px',
-          color: '#333'
-        }}>
+        <ul style={{ margin: 0, paddingLeft: '20px' }}>
           <li>ถ่ายรูปให้ชัดเจน เห็นรายละเอียดได้ดี</li>
           <li>ถ่ายภาพรวมของพื้นที่ทำงาน</li>
           <li>ถ่ายตัวอย่างเอกสารที่ต้องการประมวลผล</li>
@@ -189,32 +173,18 @@ export default function ImageUpload({ images, onImagesChange, onNext, onBack }) 
         <button
           onClick={onBack}
           disabled={uploading}
-          style={{
-            flex: '1',
-            padding: '15px',
-            backgroundColor: uploading ? '#ccc' : '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            cursor: uploading ? 'not-allowed' : 'pointer'
-          }}
+          style={{ ...glassButton(...buttonColors.neutral), flex: '1', opacity: uploading ? 0.6 : 1, cursor: uploading ? 'not-allowed' : 'pointer' }}
+          onMouseOver={uploading ? undefined : hoverLift}
+          onMouseOut={uploading ? undefined : hoverReset}
         >
           ย้อนกลับ
         </button>
         <button
           onClick={handleNext}
           disabled={uploading}
-          style={{
-            flex: '1',
-            padding: '15px',
-            backgroundColor: uploading ? '#ccc' : '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            cursor: uploading ? 'not-allowed' : 'pointer'
-          }}
+          style={{ ...glassButton(...buttonColors.primary), flex: '1', opacity: uploading ? 0.6 : 1, cursor: uploading ? 'not-allowed' : 'pointer' }}
+          onMouseOver={uploading ? undefined : hoverLift}
+          onMouseOut={uploading ? undefined : hoverReset}
         >
           ถัดไป
         </button>

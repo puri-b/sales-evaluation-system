@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import BreakdownPanel from './BreakdownPanel';
+import { glassCard, glassButton, buttonColors, hoverLift, hoverReset, glassTitlePill, glassTintDanger } from '../styles/glass';
 
 export default function EvaluationDetail({ evaluationId, onBack }) {
   const [evaluation, setEvaluation] = useState(null);
@@ -65,15 +67,12 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
     if (evaluation.service_type === 'scanning') {
       const details = evaluation.service_details;
       return (
-        <div style={{ marginBottom: '20px' }}>
-          <h4 style={{ color: '#007bff', marginBottom: '10px' }}>รายละเอียดบริการสแกนเอกสาร</h4>
+        <div style={glassCard}>
+          <h4 style={{ color: '#4338ca', marginTop: 0, marginBottom: '10px' }}>รายละเอียดบริการสแกนเอกสาร</h4>
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
             gap: '10px',
-            backgroundColor: '#f8f9fa',
-            padding: '15px',
-            borderRadius: '8px'
           }}>
             <div><strong>จำนวนเอกสารรวม:</strong> {details.doc_count || '-'}</div>
             <div><strong>ขนาดเอกสาร:</strong> {details.doc_type || '-'}</div>
@@ -98,15 +97,12 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
     } else if (evaluation.service_type === 'data_entry') {
       const details = evaluation.service_details;
       return (
-        <div style={{ marginBottom: '20px' }}>
-          <h4 style={{ color: '#007bff', marginBottom: '10px' }}>รายละเอียดบริการบันทึกข้อมูล</h4>
+        <div style={glassCard}>
+          <h4 style={{ color: '#4338ca', marginTop: 0, marginBottom: '10px' }}>รายละเอียดบริการบันทึกข้อมูล</h4>
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
             gap: '10px',
-            backgroundColor: '#f8f9fa',
-            padding: '15px',
-            borderRadius: '8px'
           }}>
             <div><strong>โปรแกรมที่ใช้:</strong> {details.software_used || '-'}</div>
             <div><strong>ลักษณะข้อมูล:</strong> {details.data_complexity || '-'}</div>
@@ -127,7 +123,7 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '50px' }}>
-        <p>กำลังโหลดข้อมูล...</p>
+        <p style={{ color: '#8b8fa3' }}>กำลังโหลดข้อมูล...</p>
       </div>
     );
   }
@@ -135,18 +131,12 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
   if (error) {
     return (
       <div style={{ textAlign: 'center', padding: '50px' }}>
-        <p style={{ color: 'red' }}>เกิดข้อผิดพลาด: {error}</p>
+        <div style={glassTintDanger}>เกิดข้อผิดพลาด: {error}</div>
         <button
           onClick={onBack}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            marginTop: '10px'
-          }}
+          style={{ ...glassButton(...buttonColors.neutral), marginTop: '10px' }}
+          onMouseOver={hoverLift}
+          onMouseOut={hoverReset}
         >
           กลับ
         </button>
@@ -171,74 +161,63 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        marginBottom: '20px' 
+        marginBottom: '20px',
+        flexWrap: 'wrap',
+        gap: '12px',
       }}>
-        <h2 style={{ color: '#333', margin: 0 }}>รายละเอียดการประเมิน</h2>
+        <div style={glassTitlePill}>
+          <span style={{ fontSize: '20px' }}>📝</span>
+          <h2 style={{ color: '#1f2937', margin: 0, fontSize: '17px', fontWeight: 700 }}>รายละเอียดการประเมิน</h2>
+        </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button
             onClick={handlePrint}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer'
-            }}
+            style={glassButton(...buttonColors.success)}
+            onMouseOver={hoverLift}
+            onMouseOut={hoverReset}
           >
             🖨️ Print
           </button>
           <button
             onClick={onBack}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#6c757d',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer'
-            }}
+            style={glassButton(...buttonColors.neutral)}
+            onMouseOver={hoverLift}
+            onMouseOut={hoverReset}
           >
             กลับ
           </button>
         </div>
       </div>
 
-      <div style={{ 
-        backgroundColor: 'white',
-        border: '1px solid #e0e0e0',
-        borderRadius: '8px',
-        padding: '20px',
-        marginBottom: '20px'
-      }}>
-        <h3 style={{ color: '#333', marginBottom: '15px' }}>ข้อมูลทั่วไป</h3>
+      <div style={glassCard}>
+        <h3 style={{ color: '#1f2937', marginTop: 0, marginBottom: '15px' }}>ข้อมูลทั่วไป</h3>
         <div style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
           gap: '15px' 
         }}>
           <div>
-            <strong style={{ color: '#007bff' }}>รหัสการประเมิน:</strong>
+            <strong style={{ color: '#4338ca' }}>รหัสการประเมิน:</strong>
             <div>#{evaluation.id}</div>
           </div>
           <div>
-            <strong style={{ color: '#007bff' }}>บริการ:</strong>
+            <strong style={{ color: '#4338ca' }}>บริการ:</strong>
             <div>{getServiceName(evaluation.service_type)}</div>
           </div>
           <div>
-            <strong style={{ color: '#007bff' }}>วันที่ประเมิน:</strong>
+            <strong style={{ color: '#4338ca' }}>วันที่ประเมิน:</strong>
             <div>{formatDate(evaluation.evaluation_date)}</div>
           </div>
           <div>
-            <strong style={{ color: '#007bff' }}>พนักงานขาย:</strong>
+            <strong style={{ color: '#4338ca' }}>พนักงานขาย:</strong>
             <div>{evaluation.salesperson_name}</div>
           </div>
           <div>
-            <strong style={{ color: '#007bff' }}>ลูกค้า:</strong>
+            <strong style={{ color: '#4338ca' }}>ลูกค้า:</strong>
             <div>{evaluation.customer_name}</div>
           </div>
           <div>
-            <strong style={{ color: '#007bff' }}>วันที่บันทึก:</strong>
+            <strong style={{ color: '#4338ca' }}>วันที่บันทึก:</strong>
             <div>{formatDate(evaluation.created_at)}</div>
           </div>
         </div>
@@ -246,15 +225,13 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
 
       {renderServiceDetails()}
 
+      <div className="no-print">
+        <BreakdownPanel evaluationId={evaluation.id} serviceType={evaluation.service_type} />
+      </div>
+
       {evaluation.images && evaluation.images.length > 0 && (
-        <div style={{ 
-          backgroundColor: 'white',
-          border: '1px solid #e0e0e0',
-          borderRadius: '8px',
-          padding: '20px',
-          marginBottom: '20px'
-        }}>
-          <h4 style={{ color: '#007bff', marginBottom: '10px' }}>
+        <div style={glassCard}>
+          <h4 style={{ color: '#4338ca', marginTop: 0, marginBottom: '10px' }}>
             รูปภาพประกอบ ({evaluation.images.length} รูป)
           </h4>
           <div style={{ 
@@ -267,10 +244,12 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
                 key={index} 
                 style={{ 
                   textAlign: 'center',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.7)',
+                  borderRadius: '12px',
                   padding: '10px',
-                  backgroundColor: '#f9f9f9'
+                  background: 'rgba(255,255,255,0.55)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
                 }}
               >
                 <img
@@ -280,7 +259,7 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
                     width: '100%',
                     height: '150px',
                     objectFit: 'cover',
-                    borderRadius: '5px',
+                    borderRadius: '8px',
                     cursor: 'pointer',
                     transition: 'transform 0.2s ease'
                   }}
@@ -288,7 +267,7 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
                   onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
                   onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
                 />
-                <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '5px' }}>
                   รูปภาพที่ {index + 1}
                 </p>
               </div>
@@ -305,7 +284,9 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -318,8 +299,11 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
               position: 'relative',
               maxWidth: '90%',
               maxHeight: '90%',
-              backgroundColor: 'white',
-              borderRadius: '8px',
+              background: 'rgba(255,255,255,0.85)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255,255,255,0.6)',
               padding: '20px'
             }}
             onClick={(e) => e.stopPropagation()}

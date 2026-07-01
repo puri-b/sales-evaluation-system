@@ -1,22 +1,11 @@
 import { useState } from 'react';
+import { glassInput, glassCard, glassButton, buttonColors, hoverLift, hoverReset, glassTintSuccess } from '../styles/glass';
 
 const DOCUMENT_SIZE_OPTIONS = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'อื่นๆ'];
 
-const inputStyle = {
-  width: '100%',
-  padding: '10px',
-  border: '1px solid #ddd',
-  borderRadius: '5px',
-  fontSize: '16px'
-};
+const inputStyle = glassInput;
 
-const sectionCardStyle = {
-  border: '1px solid #e5e7eb',
-  borderRadius: '10px',
-  padding: '15px',
-  backgroundColor: '#f8f9fa',
-  marginBottom: '20px'
-};
+const sectionCardStyle = { ...glassCard, marginBottom: '20px' };
 
 const createDefaultDocumentSize = () => ({
   doc_type: '',
@@ -207,17 +196,9 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
           <button
             type="button"
             onClick={addDocumentSize}
-            style={{
-              padding: '10px 12px',
-              backgroundColor: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap'
-            }}
+            style={glassButton(...buttonColors.success)}
+            onMouseOver={hoverLift}
+            onMouseOut={hoverReset}
           >
             + เพิ่มขนาดเอกสาร
           </button>
@@ -226,13 +207,7 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
         {localData.document_sizes.map((item, index) => (
           <div
             key={index}
-            style={{
-              backgroundColor: 'white',
-              border: '1px solid #ddd',
-              borderRadius: '8px',
-              padding: '12px',
-              marginBottom: '10px'
-            }}
+            style={{ ...glassCard, marginBottom: '10px', padding: '14px' }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <strong>รายการที่ {index + 1}</strong>
@@ -240,15 +215,9 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
                 <button
                   type="button"
                   onClick={() => removeDocumentSize(index)}
-                  style={{
-                    padding: '6px 10px',
-                    backgroundColor: '#dc3545',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '13px',
-                    cursor: 'pointer'
-                  }}
+                  style={{ ...glassButton(...buttonColors.danger), padding: '6px 14px', fontSize: '13px' }}
+                  onMouseOver={hoverLift}
+                  onMouseOut={hoverReset}
                 >
                   ลบ
                 </button>
@@ -304,13 +273,7 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
           </div>
         ))}
 
-        <div style={{
-          backgroundColor: '#e9f7ef',
-          border: '1px solid #b7e4c7',
-          borderRadius: '8px',
-          padding: '10px',
-          color: '#155724'
-        }}>
+        <div style={{ ...glassTintSuccess, marginBottom: 0 }}>
           <div><strong>จำนวนเอกสารรวม:</strong> {localData.doc_count || 0}</div>
           <div><strong>สรุปขนาดเอกสาร:</strong> {localData.doc_type || '-'}</div>
         </div>
@@ -368,7 +331,7 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
             type="checkbox"
             checked={localData.return_stapled}
             onChange={(e) => handleInputChange('return_stapled', e.target.checked)}
-            style={{ transform: 'scale(1.2)' }}
+            style={{ transform: 'scale(1.3)', accentColor: '#6366f1' }}
           />
           <span style={{ fontWeight: 'bold' }}>การคืนเอกสาร - กรณีเย็บแม็กมา ต้องแม็กคืนเหมือนเดิม</span>
         </label>
@@ -434,7 +397,7 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
                 type="checkbox"
                 checked={localData.is_pc_provided}
                 onChange={(e) => handleInputChange('is_pc_provided', e.target.checked)}
-                style={{ transform: 'scale(1.2)' }}
+                style={{ transform: 'scale(1.3)', accentColor: '#6366f1' }}
               />
               <span style={{ fontWeight: 'bold' }}>มีเครื่องคอมพิวเตอร์ให้</span>
             </label>
@@ -446,7 +409,7 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
                 type="checkbox"
                 checked={localData.is_desk_provided}
                 onChange={(e) => handleInputChange('is_desk_provided', e.target.checked)}
-                style={{ transform: 'scale(1.2)' }}
+                style={{ transform: 'scale(1.3)', accentColor: '#6366f1' }}
               />
               <span style={{ fontWeight: 'bold' }}>มีโต๊ะ มีเก้าอี้ให้</span>
             </label>
@@ -475,7 +438,7 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
             type="checkbox"
             checked={localData.training_required}
             onChange={(e) => handleInputChange('training_required', e.target.checked)}
-            style={{ transform: 'scale(1.2)' }}
+            style={{ transform: 'scale(1.3)', accentColor: '#6366f1' }}
           />
           <span style={{ fontWeight: 'bold' }}>ต้องมีการอบรมก่อนเริ่มงานหรือไม่</span>
         </label>
@@ -496,31 +459,17 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
       <div style={{ display: 'flex', gap: '10px', marginTop: '30px' }}>
         <button
           onClick={onBack}
-          style={{
-            flex: '1',
-            padding: '15px',
-            backgroundColor: '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            cursor: 'pointer'
-          }}
+          style={{ ...glassButton(...buttonColors.neutral), flex: '1' }}
+          onMouseOver={hoverLift}
+          onMouseOut={hoverReset}
         >
           ย้อนกลับ
         </button>
         <button
           onClick={handleSubmit}
-          style={{
-            flex: '1',
-            padding: '15px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            cursor: 'pointer'
-          }}
+          style={{ ...glassButton(...buttonColors.primary), flex: '1' }}
+          onMouseOver={hoverLift}
+          onMouseOut={hoverReset}
         >
           ถัดไป
         </button>
