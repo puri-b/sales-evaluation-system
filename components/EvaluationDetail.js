@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import BreakdownPanel from './BreakdownPanel';
+import DataEntryFieldsTable from './DataEntryFieldsTable';
 import { glassCard, glassButton, buttonColors, hoverLift, hoverReset, glassTitlePill, glassTintDanger } from '../styles/glass';
 
 export default function EvaluationDetail({ evaluationId, onBack }) {
@@ -97,6 +98,7 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
     } else if (evaluation.service_type === 'data_entry') {
       const details = evaluation.service_details;
       return (
+        <>
         <div style={glassCard}>
           <h4 style={{ color: '#4338ca', marginTop: 0, marginBottom: '10px' }}>รายละเอียดบริการบันทึกข้อมูล</h4>
           <div style={{ 
@@ -116,6 +118,8 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
             <div><strong>ผู้รับผิดชอบขนส่ง:</strong> {details.transport_responsibility || '-'}</div>
           </div>
         </div>
+        <DataEntryFieldsTable fields={details.fields} remarks={details.remarks} />
+        </>
       );
     }
   };
@@ -145,7 +149,7 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
   }
 
   return (
-    <div>
+    <div className="print-report-root">
       <style jsx>{`
         @media print {
           .no-print {

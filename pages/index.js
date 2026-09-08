@@ -129,13 +129,13 @@ export default function Home() {
   // แสดงหน้ารายละเอียดการประเมิน
   if (currentView === 'detail') {
     return (
-      <div style={{ 
+      <div className="print-report-page" style={{ 
         padding: '20px', 
         maxWidth: '1200px', 
         margin: '0 auto',
       }}>
-        <div style={{ ...glassPanel }}>
-          <GlassBlobs />
+        <div className="print-report-panel" style={{ ...glassPanel }}>
+          <div className="no-print"><GlassBlobs /></div>
           <div style={{ position: 'relative' }}>
             <EvaluationDetail 
               evaluationId={selectedEvaluationId}

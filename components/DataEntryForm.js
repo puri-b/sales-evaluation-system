@@ -1,8 +1,13 @@
 import { useState } from 'react';
+import DataEntryFieldsEditor from './DataEntryFieldsEditor';
+import { validateDataEntryFields } from '../lib/dataEntryFields';
 import { glassInput, glassTextarea, glassButton, buttonColors, hoverLift, hoverReset } from '../styles/glass';
 
 export default function DataEntryForm({ formData, onFormChange, onNext, onBack }) {
+  const [fieldErrors, setFieldErrors] = useState([]);
   const [localData, setLocalData] = useState({
+    fields: Array.isArray(formData.fields) ? formData.fields.map((field, index) => ({ ...field, _key: `existing-${index}` })) : [],
+    remarks: formData.remarks || '',
     salesperson_name: formData.salesperson_name || '',
     customer_name: formData.customer_name || '',
     software_used: formData.software_used || '',
@@ -21,6 +26,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
 
   const handleInputChange = (field, value) => {
     const newData = { ...localData, [field]: value };
+    setFieldErrors([]);
     setLocalData(newData);
     onFormChange(newData);
   };
@@ -34,6 +40,13 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
       return;
     }
     
+    try {
+      validateDataEntryFields(localData);
+    } catch (error) {
+      setFieldErrors(error.details || []);
+      return;
+    }
+
     onNext();
   };
 
@@ -251,6 +264,14 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
           placeholder="ระบุสถานที่กินอาหาร เช่น โรงอาหาร ร้านอาหารใกล้เคียง หรือไม่มี"
         />
       </div>
+
+      <DataEntryFieldsEditor
+        fields={localData.fields}
+        remarks={localData.remarks}
+        onFieldsChange={(fields) => handleInputChange('fields', fields)}
+        onRemarksChange={(remarks) => handleInputChange('remarks', remarks)}
+        errors={fieldErrors}
+      />
 
       <div style={{ display: 'flex', gap: '10px', marginTop: '30px' }}>
         <button

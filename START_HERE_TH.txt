@@ -1,0 +1,62 @@
+SALE EVALUATION SYSTEM - FULL PROJECT (Data Entry Fields)
+=========================================================
+
+ชุดนี้เป็น Full Project ใช้แทนโฟลเดอร์โปรเจกต์เดิมได้ทั้งก้อน
+ไม่ต้องนำ Patch/Hotfix ใด ๆ มาวางทับอีก
+
+สิ่งที่รวมมาแล้ว
+- โครงสร้างเดิมของระบบประเมินงานขาย
+- งานบริการสแกนเอกสาร
+- งานบริการบันทึกข้อมูล
+- ฟังก์ชันเพิ่มรายการ Field ที่ลูกค้าต้องการให้บันทึก
+- Field Name + Data Type (number/date/text) + หมายเหตุราย Field
+- หมายเหตุรวมแบบ Free text
+- ตาราง Field ในหน้าสรุป/รายละเอียด/Print
+- API สำหรับบันทึกและอ่านรายการ Field
+- SQL Migration 003 สำหรับ PostgreSQL
+- ไฟล์พื้นฐานเดิมทั้งหมด เช่น ServiceSelector, DateSelector, ScanningForm,
+  BreakdownPanel, styles/glass.js ฯลฯ
+- next.config.js ที่เอา config "api" ซึ่ง Next.js 14 ไม่รองรับออกแล้ว
+
+ไฟล์ที่ตั้งใจไม่ใส่มา
+- .env.local       : มีข้อมูลเชื่อมต่อฐานข้อมูลของแต่ละเครื่อง/ระบบ
+- node_modules/    : ให้ติดตั้งใหม่ด้วย npm ci เพื่อให้ตรงกับเครื่อง Mac ของคุณ
+- .next/           : build cache เก่า ไม่ควรนำมาปนกับชุดใหม่
+- .git/            : repository history ของต้นฉบับ ไม่จำเป็นสำหรับการรัน
+
+วิธีใช้ที่ปลอดภัยที่สุด
+1) หยุด npm run dev เดิมด้วย Ctrl+C
+2) เปลี่ยนชื่อโฟลเดอร์เดิม เช่น
+      sales-evaluation-system-old
+3) แตก ZIP นี้ จะได้โฟลเดอร์
+      sales-evaluation-system
+4) COPY เฉพาะไฟล์ .env.local จากโฟลเดอร์เก่า มาไว้ที่ root ของโฟลเดอร์ใหม่
+   (ห้าม copy components/pages/styles จากโฟลเดอร์เก่ามาทับ)
+5) เปิด Terminal ในโฟลเดอร์ใหม่ แล้วรัน
+      npm ci
+      npm run dev
+6) เปิด http://localhost:3000
+
+ฐานข้อมูล
+- ถ้ายังไม่เคยรัน Migration ฟังก์ชัน Field ให้รัน
+      sql/003_data_entry_fields.sql
+  ใน DBeaver กับฐานข้อมูลทดสอบก่อน
+- จากนั้นตรวจด้วย
+      sql/003_verify_data_entry_fields.sql
+- ถ้าเคยรัน Migration 003 สำเร็จแล้ว ไม่ต้องรันซ้ำเพื่อเริ่ม localhost
+
+การตรวจชุดส่งมอบ
+- Unit/API tests: 39/39 ผ่าน
+- ตรวจ relative imports: ผ่าน ไม่มี module ภายในโปรเจกต์ที่หาไม่เจอ
+- ตรวจ syntax JavaScript: ผ่าน
+- Production build ใน environment ของผู้จัดทำไม่สามารถจบได้เพราะไม่มี
+  @next/swc binary สำหรับ Linux ใน node_modules ต้นฉบับจาก Mac
+  บนเครื่อง Mac ของคุณ npm ci จะติดตั้ง SWC ที่ตรง architecture ก่อน build
+
+ก่อนขึ้น Vercel
+1) ให้ localhost ทำงานครบก่อน
+2) npm run build ต้องผ่านบนเครื่องคุณ
+3) ทดสอบ Vercel Preview และ DB ทดสอบ
+4) จึงค่อยปรับ Production DB และ Deploy Production
+
+สำคัญ: ชุดนี้เป็น Full Project ใหม่ ไม่ต้องใช้ ZIP Patch/Hotfix ก่อนหน้าแล้ว

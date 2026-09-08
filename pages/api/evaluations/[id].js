@@ -1,4 +1,5 @@
 import { query } from '../../../lib/db';
+import { DATA_ENTRY_TEXT } from '../../../lib/dataEntryFields';
 
 export default async function handler(req, res) {
   const { id } = req.query;
@@ -45,7 +46,17 @@ export default async function handler(req, res) {
           'SELECT * FROM "X_SalesApp".data_entry_details WHERE evaluation_id = $1',
           [id]
         );
-        serviceDetails = dataEntryResult.rows[0] || null;
+        const fieldsResult = await query(
+          `SELECT id, field_name, data_type, remarks, sort_order
+           FROM "X_SalesApp".data_entry_fields
+           WHERE evaluation_id = $1 ORDER BY sort_order ASC, id ASC`,
+          [id]
+        );
+        serviceDetails = dataEntryResult.rows[0] ? {
+          ...dataEntryResult.rows[0],
+          remarks: dataEntryResult.rows[0].remarks || '',
+          fields: fieldsResult.rows,
+        } : null;
       }
 
       res.status(200).json({
@@ -59,6 +70,9 @@ export default async function handler(req, res) {
 
     } catch (error) {
       console.error('Error fetching evaluation detail:', error);
+      if (['42P01', '42703'].includes(error.code)) {
+        return res.status(503).json({ success: false, message: DATA_ENTRY_TEXT.migrationRequired });
+      }
       res.status(500).json({
         success: false,
         message: 'เกิดข้อผิดพลาดในการดึงข้อมูล: ' + error.message,

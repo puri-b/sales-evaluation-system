@@ -1,4 +1,5 @@
 import { query, pool } from '../../lib/db';
+import { validateDataEntryFields, DataEntryValidationError, DATA_ENTRY_TEXT } from '../../lib/dataEntryFields';
 
 const getDisplayDocType = (item) => {
   if (!item) return '';
@@ -29,6 +30,9 @@ const buildScanningDocumentSummary = (scanningData) => {
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
+      if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
+        return res.status(400).json({ success: false, message: DATA_ENTRY_TEXT.invalidValue });
+      }
       const { 
         service_type, 
         evaluation_date, 
@@ -38,6 +42,11 @@ export default async function handler(req, res) {
         data_entry_data,
         images
       } = req.body;
+
+      if (!['scanning', 'data_entry'].includes(service_type)) {
+        return res.status(400).json({ success: false, message: DATA_ENTRY_TEXT.invalidValue });
+      }
+      const entryFields = service_type === 'data_entry' ? validateDataEntryFields(data_entry_data) : null;
 
       const client = await pool.connect();
       
@@ -90,8 +99,8 @@ export default async function handler(req, res) {
             `INSERT INTO "X_SalesApp".data_entry_details 
              (evaluation_id, software_used, data_complexity, deadline, data_volume, 
               data_type, entry_language, source_format, qa_process, revision_process, 
-              transport_responsibility, training_required, food_location)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+              transport_responsibility, training_required, food_location, remarks)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
             [
               evaluationId,
               data_entry_data.software_used || null,
@@ -105,8 +114,21 @@ export default async function handler(req, res) {
               data_entry_data.revision_process || null,
               data_entry_data.transport_responsibility || null,
               data_entry_data.training_required || false,
-              data_entry_data.food_location || null
+              data_entry_data.food_location || null,
+              entryFields.remarks
             ]
+          );
+        }
+
+        // Field definitions, details, parent evaluation and images share ONE transaction.
+        if (entryFields && entryFields.fields.length > 0) {
+          await client.query(
+            `INSERT INTO "X_SalesApp".data_entry_fields
+             (evaluation_id, field_name, data_type, remarks, sort_order)
+             SELECT $1, f.field_name, f.data_type, f.remarks, f.sort_order
+             FROM jsonb_to_recordset($2::jsonb)
+               AS f(field_name text, data_type text, remarks text, sort_order integer)`,
+            [evaluationId, JSON.stringify(entryFields.fields)]
           );
         }
 
@@ -152,11 +174,15 @@ export default async function handler(req, res) {
       }
 
     } catch (error) {
+      if (error instanceof DataEntryValidationError) {
+        return res.status(400).json({ success: false, message: error.message, errors: error.details });
+      }
       console.error('Error saving evaluation:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + error.message,
-        error: error.message 
+      const missingMigration = req.body?.service_type === 'data_entry'
+        && ['42P01', '42703'].includes(error.code);
+      res.status(missingMigration ? 503 : 500).json({
+        success: false,
+        message: missingMigration ? DATA_ENTRY_TEXT.migrationRequired : DATA_ENTRY_TEXT.saveFailed,
       });
     }
   } else if (req.method === 'GET') {

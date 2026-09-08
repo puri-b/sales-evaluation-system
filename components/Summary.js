@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import DataEntryFieldsTable from './DataEntryFieldsTable';
+import { validateDataEntryFields, DataEntryValidationError } from '../lib/dataEntryFields';
 import { glassCard, glassButton, buttonColors, hoverLift, hoverReset, glassTintDanger } from '../styles/glass';
 
 export default function Summary({ 
@@ -27,11 +29,9 @@ export default function Summary({
         salesperson_name: serviceData.salesperson_name,
         customer_name: serviceData.customer_name,
         scanning_data: selectedService === 'scanning' ? scanningData : null,
-        data_entry_data: selectedService === 'data_entry' ? dataEntryData : null,
+        data_entry_data: selectedService === 'data_entry' ? { ...dataEntryData, ...validateDataEntryFields(dataEntryData) } : null,
         images: images.map(img => ({ id: img.id, name: img.name, url: img.url }))
       };
-
-      console.log('Sending data:', requestData);
 
       const response = await fetch('/api/evaluations', {
         method: 'POST',
@@ -42,14 +42,17 @@ export default function Summary({
       });
 
       const result = await response.json();
-      console.log('Response:', result);
 
-      if (result.success) {
+      if (response.ok && result.success) {
         onSave(result.evaluation_id);
       } else {
         setError(result.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
       }
     } catch (error) {
+      if (error instanceof DataEntryValidationError) {
+        setError(error.message + ': ' + error.details.map((item) => item.message).join(', '));
+        return;
+      }
       console.error('Error saving:', error);
       setError('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
     } finally {
@@ -155,6 +158,7 @@ export default function Summary({
             <div><strong>ต้องมีการอบรมก่อน:</strong> {dataEntryData.training_required ? 'ใช่' : 'ไม่'}</div>
             <div><strong>สถานที่กินอาหาร:</strong> {dataEntryData.food_location || '-'}</div>
           </div>
+          <DataEntryFieldsTable fields={dataEntryData.fields} remarks={dataEntryData.remarks} />
         </div>
       );
     }
