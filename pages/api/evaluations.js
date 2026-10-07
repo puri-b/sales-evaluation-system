@@ -71,8 +71,8 @@ export default async function handler(req, res) {
              (evaluation_id, doc_count, doc_type, scan_mode, resolution_dpi, deadline, 
               return_stapled, indexing_rules, qa_process, revision_period_days, 
               scan_location, is_pc_provided, is_desk_provided, electricity_payer,
-              training_required, food_location)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+              training_required, food_location, note)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
             [
               evaluationId,
               scanningDocumentSummary.doc_count,
@@ -89,7 +89,8 @@ export default async function handler(req, res) {
               scanning_data.is_desk_provided || false,
               scanning_data.electricity_payer || null,
               scanning_data.training_required || false,
-              scanning_data.food_location || null
+              scanning_data.food_location || null,
+              scanning_data.note || null
             ]
           );
         }

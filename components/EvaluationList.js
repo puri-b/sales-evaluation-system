@@ -131,6 +131,7 @@ export default function EvaluationList({ onBack, onViewDetail }) {
                   <strong style={{ color: '#4338ca' }}>ลูกค้า:</strong>
                   <div>{evaluation.customer_name}</div>
                 </div>
+              
                 <div>
                   <strong style={{ color: '#4338ca' }}>รูปภาพ:</strong>
                   <div>{evaluation.image_count} รูป</div>

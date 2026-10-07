@@ -90,8 +90,10 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
                 <div><strong>มีคอมพิวเตอร์:</strong> {details.is_pc_provided ? 'ใช่' : 'ไม่'}</div>
                 <div><strong>มีโต๊ะเก้าอี้:</strong> {details.is_desk_provided ? 'ใช่' : 'ไม่'}</div>
                 <div><strong>ผู้รับผิดชอบค่าไฟ:</strong> {details.electricity_payer === 'customer' ? 'ลูกค้า' : details.electricity_payer === 'company' ? 'บริษัท' : '-'}</div>
+                <div><strong>สถานที่กินข้าว</strong> {details.food_location || '-'}</div>
               </>
             )}
+            <div><strong>หมายเหตุอื่นๆ:</strong> {details.note || '-'}</div>
           </div>
         </div>
       );

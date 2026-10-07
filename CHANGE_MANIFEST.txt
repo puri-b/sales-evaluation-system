@@ -1,0 +1,29 @@
+Data-entry fields update - based on the uploaded source snapshot.
+Review changes before merging into a newer repository.
+
+ADDED    .env.example
+ADDED    README_DATA_ENTRY_FIELDS_TH.md
+ADDED    components/DataEntryFieldsEditor.js
+ADDED    components/DataEntryFieldsTable.js
+MODIFIED components/DataEntryForm.js
+MODIFIED components/EvaluationDetail.js
+MODIFIED components/Summary.js
+ADDED    docs/DATA_ENTRY_FIELDS.md
+ADDED    docs/TEST_RESULTS.md
+ADDED    lib/dataEntryFields.js
+MODIFIED package.json
+MODIFIED pages/api/evaluations/[id].js
+MODIFIED pages/api/evaluations.js
+MODIFIED pages/index.js
+ADDED    sql/003_data_entry_fields.sql
+ADDED    sql/003_verify_data_entry_fields.sql
+MODIFIED styles/globals.css
+MODIFIED styles/print.css
+ADDED    tests/browser/build-harness.cjs
+ADDED    tests/browser/smoke.py
+ADDED    tests/data-entry-fields.test.cjs
+ADDED    tests/evaluations-api.test.cjs
+ADDED    tests/fields-table.test.cjs
+ADDED    tests/support/load.cjs
+
+No .env.local, dependencies, build output or private credentials are included.

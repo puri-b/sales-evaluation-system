@@ -137,6 +137,7 @@ export default function Summary({
             )}
             <div><strong>ต้องมีการอบรมก่อน:</strong> {scanningData.training_required ? 'ใช่' : 'ไม่'}</div>
             <div><strong>สถานที่กินอาหาร:</strong> {scanningData.food_location || '-'}</div>
+            <div><strong>หมายเหตุอื่นๆ:</strong> {scanningData.note || '-'}</div>
           </div>
         </div>
       );

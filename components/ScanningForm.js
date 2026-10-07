@@ -72,7 +72,8 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
     is_desk_provided: formData.is_desk_provided || false,
     electricity_payer: formData.electricity_payer || '',
     training_required: formData.training_required || false,
-    food_location: formData.food_location || ''
+    food_location: formData.food_location || '',
+    note: formData.note || ''
   });
 
   const updateLocalData = (newData) => {
@@ -453,6 +454,18 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
           onChange={(e) => handleInputChange('food_location', e.target.value)}
           style={{ ...inputStyle, height: '60px' }}
           placeholder="ระบุสถานที่กินอาหาร เช่น โรงอาหาร ร้านอาหารใกล้เคียง หรือไม่มี"
+        />
+      </div>
+
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+          หมายเหตุเพิ่มเติม
+        </label>
+        <textarea
+          value={localData.note}
+          onChange={(e) => handleInputChange('note', e.target.value)}
+          style={{ ...inputStyle, height: '60px' }}
+          placeholder="รายละเอียดเพิ่มอื่นๆ หากมี"
         />
       </div>
 

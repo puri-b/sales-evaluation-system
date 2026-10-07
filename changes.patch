@@ -1,0 +1,1565 @@
+--- /dev/null
++++ b/.env.example
+@@ -0,0 +1,7 @@
++# LOCAL DEVELOPMENT ONLY: copy to .env.local and fill in your own credentials.
++# For Vercel, keep existing values in Project Settings > Environment Variables.
++DB_HOST=your-database-host
++DB_PORT=5432
++DB_NAME=your-database-name
++DB_USER=your-application-role
++DB_PASSWORD=replace-with-your-secret
+--- /dev/null
++++ b/README_DATA_ENTRY_FIELDS_TH.md
+@@ -0,0 +1,52 @@
++# เพิ่มฟิลด์ในงานบันทึกข้อมูล
++
++## สิ่งที่เพิ่ม
++
++ปุ่ม **+ เพิ่มฟิลด์** พร้อมชื่อฟิลด์, Data Type (`number`, `date`, `text`),
++หมายเหตุรายฟิลด์ และหมายเหตุรวม
++แสดงตารางในหน้าสรุปและหน้าพิมพ์
++
++เพิ่มได้สูงสุด 100 ฟิลด์; ชื่อ 200 ตัวอักษร;
++หมายเหตุรายฟิลด์ 2,000; หมายเหตุรวม 5,000
++
++## ก่อนนำขึ้นระบบจริง
++
++1. **สำรองฐานข้อมูล** และสร้าง branch ใหม่
++2. ทดสอบกับฐานข้อมูลทดสอบก่อน ไม่ใช่ฐานจริง
++3. เปิด `sql/003_data_entry_fields.sql` ใน DBeaver ตรวจฐานข้อมูลและ schema `X_SalesApp`
++   แล้ว Execute Script **ทั้งไฟล์**
++4. รัน `sql/003_verify_data_entry_fields.sql` เพื่อตรวจผล และสิทธิ์ของ role ที่แอปใช้ (`DB_USER`)
++5. ทดสอบ Vercel Preview โดยตั้ง Environment Variables ให้ชี้ฐานทดสอบ
++6. เมื่อทดสอบผ่าน ให้รัน SQL บน Production **ก่อน Deploy แอป**
++
++```bash
++npm ci
++npm test
++npm run build
++```
++
++**ถ้า SQL มี error ห้าม Deploy ต่อ** ให้ตรวจสอบและแก้ไขก่อน
++
++## ผลการทดสอบ
++
++ผ่าน Unit/API tests 39 กรณี และ Browser tests 11 รายการ
++โดยใช้ข้อมูลจำลอง (mock)
++ยังไม่ได้ทดสอบกับ PostgreSQL จริง และยังไม่ได้ Deploy
++
++**Production build ยังยืนยันไม่ได้**
++เพราะสภาพแวดล้อมนี้ดาวน์โหลด SWC ไม่สำเร็จ
++ต้องรัน build และทดสอบบนเครื่องหรือ Vercel Preview ก่อนใช้งานจริง
++
++## การย้อนกลับ
++
++กลับไปใช้แอปเวอร์ชันก่อนหน้า
++แต่ **คงตารางและคอลัมน์ใหม่ไว้** เพื่อไม่ให้ข้อมูลที่บันทึกไว้หาย
++
++## ไฟล์ที่ควรอ่าน
++
++- `docs/DATA_ENTRY_FIELDS.md`: รายละเอียดทางเทคนิค SQL, API, สิทธิ์ฐานข้อมูล และการ Deploy
++- `docs/TEST_RESULTS.md`: ผลทดสอบและข้อจำกัด
++- `CHANGE_MANIFEST.txt`: รายการไฟล์ที่เพิ่ม/แก้ไข
++
++ชุดไฟล์นี้ **ไม่รวม `.env.local`** ให้ใช้ค่า Environment Variables เดิมบน Vercel
++ไฟล์ `.env.example` เป็นเพียงตัวอย่าง ห้ามใช้แทนค่าจริง
+--- /dev/null
++++ b/components/DataEntryFieldsEditor.js
+@@ -0,0 +1,126 @@
++import { useEffect, useId, useRef } from 'react';
++import { DATA_ENTRY_FIELD_TYPES, DATA_ENTRY_LIMITS, DATA_ENTRY_TEXT as t } from '../lib/dataEntryFields';
++import { glassInput, glassTextarea, glassButton, buttonColors } from '../styles/glass';
++
++export default function DataEntryFieldsEditor({ fields, remarks, onFieldsChange, onRemarksChange, errors = [] }) {
++  const id = useId();
++  const counter = useRef(0);
++  const inputs = useRef(new Map());
++  const focusKey = useRef(null);
++  const errorFor = (path) => errors.find((error) => error.path === path)?.message;
++
++  useEffect(() => {
++    if (focusKey.current) {
++      inputs.current.get(focusKey.current)?.focus();
++      focusKey.current = null;
++    }
++  }, [fields]);
++
++  const addField = () => {
++    if (fields.length >= DATA_ENTRY_LIMITS.fields) return;
++    const key = `${id}-${counter.current++}`;
++    focusKey.current = key;
++    onFieldsChange([...fields, { _key: key, field_name: '', data_type: '', remarks: '' }]);
++  };
++  const changeField = (index, property, value) => {
++    onFieldsChange(fields.map((field, i) => i === index ? { ...field, [property]: value } : field));
++  };
++
++  return (
++    <section className="data-entry-fields-editor" aria-labelledby={`${id}-heading`}>
++      <div className="data-entry-fields-heading">
++        <h4 id={`${id}-heading`}>{t.title}</h4>
++        <span className="data-entry-fields-count" aria-live="polite">{fields.length} / {DATA_ENTRY_LIMITS.fields}</span>
++      </div>
++      <p className="data-entry-fields-help">{t.help}<br />{t.textHint}</p>
++      {errors.length > 0 && (
++        <div role="alert" className="data-entry-fields-errors">
++          <strong>{t.invalid}</strong>
++          {errors.map((error, index) => (
++            <div key={`${error.path}-${index}`}>
++              {error.path.startsWith('fields.') ? `${t.field} ${Number(error.path.split('.')[1]) + 1}: ` : ''}
++              {error.message}
++            </div>
++          ))}
++        </div>
++      )}
++      {fields.length === 0 && <p className="data-entry-fields-empty">{t.empty}</p>}
++      {fields.map((field, index) => {
++        const key = field._key;
++        const rowId = `${id}-row-${index}`;
++        return (
++          <fieldset key={key} className="data-entry-field-row">
++            <legend>{t.field} {index + 1}</legend>
++            <div className="data-entry-field-inputs">
++              <div>
++                <label htmlFor={`${rowId}-name`}>{t.fieldName} *</label>
++                <input
++                  ref={(element) => element ? inputs.current.set(key, element) : inputs.current.delete(key)}
++                  id={`${rowId}-name`}
++                  type="text"
++                  value={field.field_name}
++                  maxLength={DATA_ENTRY_LIMITS.fieldName}
++                  onChange={(event) => changeField(index, 'field_name', event.target.value)}
++                  aria-invalid={Boolean(errorFor(`fields.${index}.field_name`))}
++                  style={glassInput}
++                  placeholder={t.fieldPlaceholder}
++                />
++              </div>
++              <div>
++                <label htmlFor={`${rowId}-type`}>Data Type *</label>
++                <select
++                  id={`${rowId}-type`}
++                  value={field.data_type}
++                  onChange={(event) => changeField(index, 'data_type', event.target.value)}
++                  aria-invalid={Boolean(errorFor(`fields.${index}.data_type`))}
++                  style={glassInput}
++                >
++                  <option value="">{t.chooseType}</option>
++                  {DATA_ENTRY_FIELD_TYPES.map((type) => <option key={type} value={type}>{t[type]}</option>)}
++                </select>
++              </div>
++            </div>
++            <label htmlFor={`${rowId}-remarks`}>{t.remarks} ({t.optional})</label>
++            <textarea
++              id={`${rowId}-remarks`}
++              value={field.remarks}
++              maxLength={DATA_ENTRY_LIMITS.fieldRemarks}
++              onChange={(event) => changeField(index, 'remarks', event.target.value)}
++              aria-invalid={Boolean(errorFor(`fields.${index}.remarks`))}
++              style={{ ...glassTextarea, minHeight: '72px' }}
++              placeholder={t.notePlaceholder}
++            />
++            <div className="data-entry-field-actions">
++              <small>{field.remarks.length} / {DATA_ENTRY_LIMITS.fieldRemarks}</small>
++              <button
++                type="button"
++                className="data-entry-field-remove"
++                aria-label={`${t.remove} ${index + 1}`}
++                onClick={() => onFieldsChange(fields.filter((_, i) => i !== index))}
++              >{t.remove}</button>
++            </div>
++          </fieldset>
++        );
++      })}
++      <button
++        type="button"
++        onClick={addField}
++        disabled={fields.length >= DATA_ENTRY_LIMITS.fields}
++        style={{ ...glassButton(...buttonColors.primary), opacity: fields.length >= DATA_ENTRY_LIMITS.fields ? 0.5 : 1 }}
++      >{t.add}</button>
++      <div className="data-entry-general-remarks">
++        <label htmlFor={`${id}-remarks`}>{t.generalRemarks} ({t.optional})</label>
++        <textarea
++          id={`${id}-remarks`}
++          value={remarks}
++          maxLength={DATA_ENTRY_LIMITS.remarks}
++          onChange={(event) => onRemarksChange(event.target.value)}
++          aria-invalid={Boolean(errorFor('remarks'))}
++          style={{ ...glassTextarea, minHeight: '100px' }}
++          placeholder={t.generalPlaceholder}
++        />
++        <small>{remarks.length} / {DATA_ENTRY_LIMITS.remarks}</small>
++      </div>
++    </section>
++  );
++}
+--- /dev/null
++++ b/components/DataEntryFieldsTable.js
+@@ -0,0 +1,39 @@
++import { DATA_ENTRY_TEXT as t } from '../lib/dataEntryFields';
++
++/** One read-only component for the pre-save summary and saved/printed report. */
++export default function DataEntryFieldsTable({ fields = [], remarks = '' }) {
++  const rows = Array.isArray(fields) ? fields : [];
++  return (
++    <section className="data-entry-fields-report">
++      <h4>{t.title} ({rows.length})</h4>
++      <table className="data-entry-fields-table">
++        <caption className="sr-only">{t.title}</caption>
++        <colgroup>
++          <col style={{ width: '8%' }} />
++          <col style={{ width: '30%' }} />
++          <col style={{ width: '20%' }} />
++          <col style={{ width: '42%' }} />
++        </colgroup>
++        <thead>
++          <tr><th scope="col">{t.order}</th><th scope="col">{t.fieldName}</th><th scope="col">Data Type</th><th scope="col">{t.remarks}</th></tr>
++        </thead>
++        <tbody>
++          {rows.length === 0 ? (
++            <tr><td colSpan={4}>{t.empty}</td></tr>
++          ) : rows.map((field, index) => (
++            <tr key={field.id ?? field._key ?? index}>
++              <td>{index + 1}</td>
++              <td>{field.field_name || '-'}</td>
++              <td>{t[field.data_type] || field.data_type || '-'}</td>
++              <td className="data-entry-free-text">{field.remarks?.trim() ? field.remarks : '-'}</td>
++            </tr>
++          ))}
++        </tbody>
++      </table>
++      <div className="data-entry-report-remarks">
++        <strong>{t.generalRemarks}</strong>
++        <div className="data-entry-free-text">{remarks?.trim() ? remarks : '-'}</div>
++      </div>
++    </section>
++  );
++}
+--- a/components/DataEntryForm.js
++++ b/components/DataEntryForm.js
+@@ -1,8 +1,13 @@
+ import { useState } from 'react';
++import DataEntryFieldsEditor from './DataEntryFieldsEditor';
++import { validateDataEntryFields } from '../lib/dataEntryFields';
+ import { glassInput, glassTextarea, glassButton, buttonColors, hoverLift, hoverReset } from '../styles/glass';
+ 
+ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }) {
++  const [fieldErrors, setFieldErrors] = useState([]);
+   const [localData, setLocalData] = useState({
++    fields: Array.isArray(formData.fields) ? formData.fields.map((field, index) => ({ ...field, _key: `existing-${index}` })) : [],
++    remarks: formData.remarks || '',
+     salesperson_name: formData.salesperson_name || '',
+     customer_name: formData.customer_name || '',
+     software_used: formData.software_used || '',
+@@ -21,6 +26,7 @@
+ 
+   const handleInputChange = (field, value) => {
+     const newData = { ...localData, [field]: value };
++    setFieldErrors([]);
+     setLocalData(newData);
+     onFormChange(newData);
+   };
+@@ -34,6 +40,13 @@
+       return;
+     }
+     
++    try {
++      validateDataEntryFields(localData);
++    } catch (error) {
++      setFieldErrors(error.details || []);
++      return;
++    }
++
+     onNext();
+   };
+ 
+@@ -252,6 +265,14 @@
+         />
+       </div>
+ 
++      <DataEntryFieldsEditor
++        fields={localData.fields}
++        remarks={localData.remarks}
++        onFieldsChange={(fields) => handleInputChange('fields', fields)}
++        onRemarksChange={(remarks) => handleInputChange('remarks', remarks)}
++        errors={fieldErrors}
++      />
++
+       <div style={{ display: 'flex', gap: '10px', marginTop: '30px' }}>
+         <button
+           onClick={onBack}
+--- a/components/EvaluationDetail.js
++++ b/components/EvaluationDetail.js
+@@ -1,5 +1,6 @@
+ import { useState, useEffect } from 'react';
+ import BreakdownPanel from './BreakdownPanel';
++import DataEntryFieldsTable from './DataEntryFieldsTable';
+ import { glassCard, glassButton, buttonColors, hoverLift, hoverReset, glassTitlePill, glassTintDanger } from '../styles/glass';
+ 
+ export default function EvaluationDetail({ evaluationId, onBack }) {
+@@ -97,6 +98,7 @@
+     } else if (evaluation.service_type === 'data_entry') {
+       const details = evaluation.service_details;
+       return (
++        <>
+         <div style={glassCard}>
+           <h4 style={{ color: '#4338ca', marginTop: 0, marginBottom: '10px' }}>รายละเอียดบริการบันทึกข้อมูล</h4>
+           <div style={{ 
+@@ -116,6 +118,8 @@
+             <div><strong>ผู้รับผิดชอบขนส่ง:</strong> {details.transport_responsibility || '-'}</div>
+           </div>
+         </div>
++        <DataEntryFieldsTable fields={details.fields} remarks={details.remarks} />
++        </>
+       );
+     }
+   };
+@@ -145,7 +149,7 @@
+   }
+ 
+   return (
+-    <div>
++    <div className="print-report-root">
+       <style jsx>{`
+         @media print {
+           .no-print {
+--- a/components/Summary.js
++++ b/components/Summary.js
+@@ -1,4 +1,6 @@
+ import { useState } from 'react';
++import DataEntryFieldsTable from './DataEntryFieldsTable';
++import { validateDataEntryFields, DataEntryValidationError } from '../lib/dataEntryFields';
+ import { glassCard, glassButton, buttonColors, hoverLift, hoverReset, glassTintDanger } from '../styles/glass';
+ 
+ export default function Summary({ 
+@@ -27,11 +29,9 @@
+         salesperson_name: serviceData.salesperson_name,
+         customer_name: serviceData.customer_name,
+         scanning_data: selectedService === 'scanning' ? scanningData : null,
+-        data_entry_data: selectedService === 'data_entry' ? dataEntryData : null,
++        data_entry_data: selectedService === 'data_entry' ? { ...dataEntryData, ...validateDataEntryFields(dataEntryData) } : null,
+         images: images.map(img => ({ id: img.id, name: img.name, url: img.url }))
+       };
+-
+-      console.log('Sending data:', requestData);
+ 
+       const response = await fetch('/api/evaluations', {
+         method: 'POST',
+@@ -42,14 +42,17 @@
+       });
+ 
+       const result = await response.json();
+-      console.log('Response:', result);
+-
+-      if (result.success) {
++
++      if (response.ok && result.success) {
+         onSave(result.evaluation_id);
+       } else {
+         setError(result.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+       }
+     } catch (error) {
++      if (error instanceof DataEntryValidationError) {
++        setError(error.message + ': ' + error.details.map((item) => item.message).join(', '));
++        return;
++      }
+       console.error('Error saving:', error);
+       setError('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
+     } finally {
+@@ -155,6 +158,7 @@
+             <div><strong>ต้องมีการอบรมก่อน:</strong> {dataEntryData.training_required ? 'ใช่' : 'ไม่'}</div>
+             <div><strong>สถานที่กินอาหาร:</strong> {dataEntryData.food_location || '-'}</div>
+           </div>
++          <DataEntryFieldsTable fields={dataEntryData.fields} remarks={dataEntryData.remarks} />
+         </div>
+       );
+     }
+--- /dev/null
++++ b/docs/DATA_ENTRY_FIELDS.md
+@@ -0,0 +1,215 @@
++# Customer-requested data-entry fields
++
++## Scope
++
++This update adds an optional list of field definitions to data-entry evaluations.
++It does not collect actual customer records and does not dynamically create SQL
++columns. The original overall `data_type` selector is retained. Scanning forms,
++image requirements and breakdown calculations keep their existing behavior.
++
++Each added row requires a field name and an explicit `number`, `date`, or `text`
++selection. Each row also has optional free-text remarks. A separate optional
++remarks box applies to the whole data-entry evaluation. Rows can be added and
++removed before saving. Editing an already saved evaluation is not part of this
++update; the original application has no update endpoint for that workflow.
++
++The same read-only table is used in the pre-save summary and the saved report.
++Use the existing **Print** button in the saved evaluation detail. Long notes wrap,
++line breaks are preserved, controls are hidden, and table headers repeat in print.
++There is no new unsaved-report Print button and no change to the breakdown Excel
++export. Field definitions are printed with the evaluation, not the cost export.
++
++## Data model
++
++```text
++"X_SalesApp".evaluations.id
++    |
++    +-- data_entry_details.evaluation_id  [existing detail relation]
++    |       remarks TEXT NOT NULL DEFAULT ''  [new column]
++    |
++    +-- data_entry_fields.evaluation_id   [new FK, ON DELETE CASCADE]
++            id SERIAL PRIMARY KEY
++            field_name VARCHAR(200)
++            data_type VARCHAR(10)  CHECK IN ('number','date','text')
++            remarks TEXT
++            sort_order INTEGER
++            created_at TIMESTAMPTZ
++```
++
++`UNIQUE (evaluation_id, sort_order)` enforces one position per evaluation and
++also indexes ordered evaluation lookups. The API assigns consecutive positions
++based on the submitted array, not client-supplied IDs or sort orders. Names and
++remarks are bound as query parameters; names are never interpolated into SQL.
++Existing detail-to-evaluation relationships are not modified by this migration.
++
++### Validation and compatibility
++
++- Maximum 100 definitions per evaluation; 200 characters per name.
++- Maximum 2,000 characters per field remark; 5,000 for general remarks.
++- Browser/API character limits use JavaScript string length (UTF-16 units).
++- New rows need a nonblank name and a supported type. Incomplete rows must be
++  completed or removed. Duplicate names are not prohibited by this update.
++- Missing `fields` and `remarks` remain valid for requests from the old UI.
++- Older evaluations return an empty list and show an explicit empty-state row.
++- Invalid API input returns HTTP 400 before a database connection is acquired.
++- A missing new schema object produces an actionable error, not silent loss of
++  the agreed field definitions. Deploy the migration before the application.
++
++## Deployment gate: not yet verified against a live PostgreSQL database
++
++No production credentials were used and no live SQL/deployment was performed.
++The supplied ER image does not provide column types or permissions in full.
++The migration assumes `evaluations.id` is INTEGER, consistent with the existing
++project migration `001_breakdown_feature.sql`. Confirm this below; if the real
++key is BIGINT, review/change the new `evaluation_id` to BIGINT before running.
++Objects already using the proposed names must be compared before proceeding.
++
++```sql
++SELECT current_database(), current_user;
++SELECT table_name, column_name, data_type, is_nullable
++FROM information_schema.columns
++WHERE table_schema = 'X_SalesApp'
++  AND ((table_name = 'evaluations' AND column_name = 'id')
++    OR table_name = 'data_entry_fields'
++    OR (table_name = 'data_entry_details' AND column_name = 'remarks'))
++ORDER BY table_name, ordinal_position;
++```
++
++### 1. Prepare and test on staging
++
++Back up the database/schema and confirm the restore procedure. Create a feature
++branch and compare the delivered patch against the current repository, rather
++than overwriting any newer work. The application root is `sales-evaluation-system/`,
++not the unrelated nested `readflow-ocr/` project retained in the full archive.
++
++Use a separate staging PostgreSQL database with a copy of the existing schema.
++In DBeaver verify the database and schema, then execute the WHOLE file
++`sql/003_data_entry_fields.sql` as a script. Do not rerun migrations 001/002 merely
++to add this feature to a database where those features already exist.
++
++The script uses a transaction, `lock_timeout = '5s'` and
++`statement_timeout = '60s'`. Additive DDL can still briefly take locks; these
++settings are not a guarantee of zero service impact. If any statement fails,
++stop, execute `ROLLBACK;` in the same session if needed, investigate, and rerun
++the whole script. Do not ignore errors or continue deployment after a failure.
++`IF NOT EXISTS` permits an ordinary rerun of this migration; it does not validate
++or repair unrelated preexisting objects with the same names.
++
++Run `sql/003_verify_data_entry_fields.sql`. If the migration is run by a role
++different from the application role, verify privileges as the app role as well.
++Substitute the actual `DB_USER` role for `app_role` in the following example;
++do not grant new privileges to PUBLIC:
++
++```sql
++GRANT USAGE ON SCHEMA "X_SalesApp" TO "app_role";
++GRANT SELECT, INSERT ON TABLE "X_SalesApp".data_entry_fields TO "app_role";
++GRANT USAGE, SELECT ON SEQUENCE "X_SalesApp".data_entry_fields_id_seq TO "app_role";
++```
++
++Existing table-level SELECT/INSERT grants on `data_entry_details` normally cover
++its added column. Review column-specific grants separately if your role uses
++those instead of table-level privileges.
++
++```bash
++npm ci
++npm test
++npm run build
++```
++
++Use Vercel Preview for the feature branch. Preview environment variables MUST
++point to staging, not production: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`,
++`DB_PASSWORD`. A Preview URL alone does not isolate writes when it shares the
++production database credentials. Keep the existing production values unchanged.
++No additional environment variables are required by this feature.
++
++### 2. Acceptance checks against actual PostgreSQL
++
++Create a data-entry evaluation with three definitions covering text, date and
++number, multiline per-field remarks and multiline general remarks. Add/delete
++a row, navigate back and forward, attach an image as required by the existing
++workflow, review the summary and save. Reopen via the list and Print. Confirm
++all field definitions, their order and both kinds of remarks match.
++
++Using its saved evaluation ID, confirm database contents:
++
++```sql
++SELECT field_name, data_type, remarks, sort_order
++FROM "X_SalesApp".data_entry_fields
++WHERE evaluation_id = 123
++ORDER BY sort_order, id;
++
++SELECT remarks
++FROM "X_SalesApp".data_entry_details
++WHERE evaluation_id = 123;
++```
++
++Also reopen an older evaluation with no fields, create a scanning evaluation,
++confirm images and cost breakdown still work, and check a long printed report.
++Test migration reruns, foreign-key/check/unique constraints, actual rollback
++behavior and app-role grants on staging. Those SQL-engine checks have not been
++executed in the supplied local test environment.
++
++### 3. Production rollout
++
++After staging acceptance and a successful production build: back up production,
++run migration 003 there during an appropriate low-traffic window, verify it and
++the application role, THEN deploy the application. Keep the schema and
++application changes in this order; deploying first causes new data-entry
++requests to fail until the migration is present. Perform a controlled post-deploy
++smoke test without introducing real customer-sensitive content into test records.
++
++### Rollback without deleting new agreement data
++
++Restore/redeploy the previous application version but KEEP the new table and
++remarks column. The prior code uses explicit INSERT column lists, so the added
++column's default allows the earlier write path to continue; the earlier UI simply
++does not display new definitions. Do not drop the table/column as a routine
++rollback, because saved definitions and remarks would be lost. Back up/export
++these data and plan a separate reviewed cleanup only if genuinely necessary.
++
++## Testing supplied with the package
++
++`npm test` runs 39 automated tests with Node's built-in test runner. Tests cover
++validation, limits, whitespace/line breaks, safe rendered text, legacy payloads,
++ordered child reads, parameter binding, transaction statement ordering, rollback
++calls on failures, image-transfer transaction ordering and unsupported methods.
++API tests mock the database; they do not execute PostgreSQL SQL.
++
++Offline browser QA uses the actual React components, transpiled with Next's
++bundled Babel, and mocked fetch results. It passed 11 scenarios, including a
++390px-wide editor and a 100-field report with a long note printed over 7 A4 pages.
++All 100 row labels were extracted from the PDF; headers repeat across pages.
++This harness is not a Next.js routing, deployment or real-database integration test.
++
++```bash
++node tests/browser/build-harness.cjs /tmp/fields-browser
++python tests/browser/smoke.py /tmp/fields-browser /tmp/fields-qa
++```
++
++The optional browser QA needs Python Playwright, Chromium and PyMuPDF. These are
++not added as application dependencies. `docs/TEST_RESULTS.md` records the test
++scope and the production-build limitation.
++
++## Boundaries and security notes
++
++No package versions were upgraded: Next.js remains 14.0.0 and React remains
++18.2.0, as in the uploaded project. This change is not a dependency/security
++upgrade. Review current official advisories and test upgrades separately.
++Existing authentication/authorization and TLS settings are unchanged and were
++not audited. No promise of production readiness or deployment is made by these
++local tests. Protect access to the existing evaluation APIs using your project's
++normal controls before exposing customer-sensitive information.
++
++The delivered archives omit `.env.local`, `node_modules`, `.next`, `.git`, macOS
++metadata and compiled/native dependencies. `.env.example` contains placeholders
++only. Never commit real credentials. Do not replace your production values with
++the placeholders.
++
++## Official references
++
++- PostgreSQL ALTER TABLE: https://www.postgresql.org/docs/current/sql-altertable.html
++- PostgreSQL constraints: https://www.postgresql.org/docs/current/ddl-constraints.html
++- node-postgres transactions: https://node-postgres.com/features/transactions
++- node-postgres parameterized queries: https://node-postgres.com/features/queries
++- Vercel environments: https://vercel.com/docs/deployments/environments
++- Next.js API routes: https://nextjs.org/docs/14/pages/building-your-application/routing/api-routes
+--- /dev/null
++++ b/docs/TEST_RESULTS.md
+@@ -0,0 +1,44 @@
++# Test results - data-entry field definitions
++
++Test date: 2026-09-08. Source baseline: the uploaded sales-evaluation-system.zip.
++Runtime: Node 22.16.0, supplied Next.js 14.0.0 / React 18.2.0 dependencies, Linux.
++No connection to the user's PostgreSQL server and no Vercel deployment were made.
++
++| Check | Result | Scope |
++| --- | --- | --- |
++| Changed JS/JSX source parsed with Babel | PASS | Eight modified/new UI/API entry files |
++| Automated Node tests | PASS, 39/39 | Validation, SSR table, API with DB mocks |
++| Browser scenarios | PASS, 11/11 | Real React components, mocked API fetch |
++| Mobile field editor | PASS | 390px viewport; no row overflow |
++| Three-field A4 print sample | PASS | One page, table + multiline remarks |
++| 100-field A4 print sample | PASS | Seven pages, all 100 labels present, repeated headers |
++| Live PostgreSQL migration/integration | NOT RUN | No live database was used |
++| Production Next.js build | NOT VERIFIED | Missing Linux SWC binary; registry DNS/network unavailable |
++| Vercel Preview / Production | NOT RUN | Must be tested by the project owner |
++
++The normal build was attempted and stopped while loading/downloading
++`@next/swc-linux-x64-gnu`. The environment could not resolve/access
++`registry.npmjs.org`. A temporary local Babel fallback also failed at SWC loading;
++all temporary build configuration was removed. The original `next.config.js` is
++unchanged. Do not treat the browser harness as proof that `next build` passes.
++Run `npm ci`, `npm test`, `npm run build` in your actual build environment.
++
++An existing warning about the `api` property in `next.config.js` was observed.
++That baseline configuration was left unchanged by this feature update.
++Dependency versions and lockfile were preserved.
++
++Browser checks:
++1. Blank added row blocks Next with inline validation.
++2. Add/remove preserves remaining row values and order.
++3. Field editor fits a 390px mobile viewport.
++4. Definitions and remarks survive Back/Next navigation.
++5. Pre-save summary renders definitions and remarks.
++6. Save payload carries fields/remarks without React keys.
++7. Saved detail calls Print and keeps the table while hiding controls.
++8. 100 fields and a long note survive seven PDF pages with repeated headers.
++9. Legacy data-entry detail shows an explicit empty field list.
++10. Scanning detail does not show data-entry definitions.
++11. No browser runtime exceptions.
++
++PDF tests use sample data only. The page count describes that sample, not a fixed
++page limit or a guarantee of identical pagination in every printer/browser.
+--- /dev/null
++++ b/lib/dataEntryFields.js
+@@ -0,0 +1,93 @@
++/** Shared by the form, API and tests. This describes fields, NOT customer values. */
++const DATA_ENTRY_FIELD_TYPES = Object.freeze(['number', 'date', 'text']);
++const DATA_ENTRY_LIMITS = Object.freeze({ fields: 100, fieldName: 200, fieldRemarks: 2000, remarks: 5000 });
++const DATA_ENTRY_TEXT = Object.freeze({
++  title: 'ฟิลด์ที่ลูกค้าต้องการให้บันทึก',
++  add: '+ เพิ่มฟิลด์',
++  remove: 'ลบฟิลด์',
++  field: 'ฟิลด์',
++  fieldName: 'ชื่อฟิลด์',
++  order: 'ลำดับ',
++  remarks: 'หมายเหตุ',
++  generalRemarks: 'หมายเหตุเพิ่มเติม',
++  optional: 'ไม่บังคับ',
++  empty: 'ยังไม่ระบุรายการฟิลด์',
++  chooseType: 'เลือก Data Type',
++  number: 'number (ตัวเลข)',
++  date: 'date (วันที่)',
++  text: 'text (ข้อความ)',
++  fieldPlaceholder: 'เช่น เลขที่เอกสาร',
++  notePlaceholder: 'เช่น รูปแบบวันที่ DD/MM/YYYY',
++  generalPlaceholder: 'ระบุรายละเอียดเพิ่มเติม',
++  help: 'ระบุชื่อฟิลด์ ไม่ใช่ข้อมูลจริงของลูกค้า',
++  textHint: 'รหัสที่ต้องเก็บเลข 0 นำหน้า ควรเลือก text',
++  invalid: 'กรุณาตรวจสอบรายการฟิลด์และหมายเหตุ',
++  nameRequired: 'กรุณาระบุชื่อฟิลด์',
++  typeRequired: 'กรุณาเลือก Data Type: number, date, text',
++  tooLong: 'ข้อความยาวเกินกำหนด',
++  invalidValue: 'ข้อมูลไม่ถูกต้อง',
++  limit: 'เพิ่มได้สูงสุด',
++  migrationRequired: 'กรุณาให้ผู้ดูแลระบบรัน sql/003_data_entry_fields.sql ก่อนใช้งาน',
++  saveFailed: 'บันทึกไม่สำเร็จ กรุณาลองใหม่',
++});
++
++class DataEntryValidationError extends Error {
++  constructor(details) {
++    super(DATA_ENTRY_TEXT.invalid);
++    this.name = 'DataEntryValidationError';
++    this.details = details;
++  }
++}
++
++/** Missing fields/remarks remain valid for evaluations posted by the old UI. */
++function validateDataEntryFields(data) {
++  if (!data || typeof data !== 'object' || Array.isArray(data)) {
++    throw new DataEntryValidationError([{ path: 'data_entry_data', message: DATA_ENTRY_TEXT.invalidValue }]);
++  }
++  const errors = [];
++  const addError = (path, message) => errors.push({ path, message });
++  const source = data.fields === undefined ? [] : data.fields;
++  const textValue = (value, path, limit) => {
++    if (value === undefined || value === null) return '';
++    if (typeof value !== 'string' || value.includes('\u0000')) {
++      addError(path, DATA_ENTRY_TEXT.invalidValue);
++      return '';
++    }
++    if (value.length > limit) addError(path, `${DATA_ENTRY_TEXT.tooLong} (${limit})`);
++    return value.replace(/\r\n?/g, '\n');
++  };
++  const remarks = textValue(data.remarks, 'remarks', DATA_ENTRY_LIMITS.remarks);
++  const fields = [];
++  if (!Array.isArray(source)) {
++    addError('fields', DATA_ENTRY_TEXT.invalidValue);
++  } else if (source.length > DATA_ENTRY_LIMITS.fields) {
++    addError('fields', `${DATA_ENTRY_TEXT.limit} ${DATA_ENTRY_LIMITS.fields} ${DATA_ENTRY_TEXT.field}`);
++  } else {
++    source.forEach((field, index) => {
++      const path = `fields.${index}`;
++      if (!field || typeof field !== 'object' || Array.isArray(field)) {
++        addError(path, DATA_ENTRY_TEXT.invalidValue);
++        return;
++      }
++      const fieldName = textValue(field.field_name, `${path}.field_name`, DATA_ENTRY_LIMITS.fieldName).trim();
++      if (!fieldName) addError(`${path}.field_name`, DATA_ENTRY_TEXT.nameRequired);
++      if (!DATA_ENTRY_FIELD_TYPES.includes(field.data_type)) {
++        addError(`${path}.data_type`, DATA_ENTRY_TEXT.typeRequired);
++      }
++      fields.push({
++        field_name: fieldName,
++        data_type: field.data_type,
++        remarks: textValue(field.remarks, `${path}.remarks`, DATA_ENTRY_LIMITS.fieldRemarks),
++        sort_order: index + 1,
++      });
++    });
++  }
++  if (errors.length) throw new DataEntryValidationError(errors);
++  return { fields, remarks };
++}
++
++// CommonJS keeps the same validation directly executable with Node's test runner.
++module.exports = {
++  DATA_ENTRY_FIELD_TYPES, DATA_ENTRY_LIMITS, DATA_ENTRY_TEXT,
++  DataEntryValidationError, validateDataEntryFields,
++};
+--- a/package.json
++++ b/package.json
+@@ -6,7 +6,8 @@
+     "dev": "next dev",
+     "build": "next build",
+     "start": "next start",
+-    "lint": "next lint"
++    "lint": "next lint",
++    "test": "node --test tests/*.test.cjs"
+   },
+   "dependencies": {
+     "next": "14.0.0",
+@@ -25,4 +26,4 @@
+     "node": ">=18.0.0",
+     "npm": ">=8.0.0"
+   }
+-}+}
+--- a/pages/api/evaluations/[id].js
++++ b/pages/api/evaluations/[id].js
+@@ -1,4 +1,5 @@
+ import { query } from '../../../lib/db';
++import { DATA_ENTRY_TEXT } from '../../../lib/dataEntryFields';
+ 
+ export default async function handler(req, res) {
+   const { id } = req.query;
+@@ -45,7 +46,17 @@
+           'SELECT * FROM "X_SalesApp".data_entry_details WHERE evaluation_id = $1',
+           [id]
+         );
+-        serviceDetails = dataEntryResult.rows[0] || null;
++        const fieldsResult = await query(
++          `SELECT id, field_name, data_type, remarks, sort_order
++           FROM "X_SalesApp".data_entry_fields
++           WHERE evaluation_id = $1 ORDER BY sort_order ASC, id ASC`,
++          [id]
++        );
++        serviceDetails = dataEntryResult.rows[0] ? {
++          ...dataEntryResult.rows[0],
++          remarks: dataEntryResult.rows[0].remarks || '',
++          fields: fieldsResult.rows,
++        } : null;
+       }
+ 
+       res.status(200).json({
+@@ -59,6 +70,9 @@
+ 
+     } catch (error) {
+       console.error('Error fetching evaluation detail:', error);
++      if (['42P01', '42703'].includes(error.code)) {
++        return res.status(503).json({ success: false, message: DATA_ENTRY_TEXT.migrationRequired });
++      }
+       res.status(500).json({
+         success: false,
+         message: 'เกิดข้อผิดพลาดในการดึงข้อมูล: ' + error.message,
+--- a/pages/api/evaluations.js
++++ b/pages/api/evaluations.js
+@@ -1,4 +1,5 @@
+ import { query, pool } from '../../lib/db';
++import { validateDataEntryFields, DataEntryValidationError, DATA_ENTRY_TEXT } from '../../lib/dataEntryFields';
+ 
+ const getDisplayDocType = (item) => {
+   if (!item) return '';
+@@ -29,6 +30,9 @@
+ export default async function handler(req, res) {
+   if (req.method === 'POST') {
+     try {
++      if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
++        return res.status(400).json({ success: false, message: DATA_ENTRY_TEXT.invalidValue });
++      }
+       const { 
+         service_type, 
+         evaluation_date, 
+@@ -38,6 +42,11 @@
+         data_entry_data,
+         images
+       } = req.body;
++
++      if (!['scanning', 'data_entry'].includes(service_type)) {
++        return res.status(400).json({ success: false, message: DATA_ENTRY_TEXT.invalidValue });
++      }
++      const entryFields = service_type === 'data_entry' ? validateDataEntryFields(data_entry_data) : null;
+ 
+       const client = await pool.connect();
+       
+@@ -90,8 +99,8 @@
+             `INSERT INTO "X_SalesApp".data_entry_details 
+              (evaluation_id, software_used, data_complexity, deadline, data_volume, 
+               data_type, entry_language, source_format, qa_process, revision_process, 
+-              transport_responsibility, training_required, food_location)
+-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
++              transport_responsibility, training_required, food_location, remarks)
++             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+             [
+               evaluationId,
+               data_entry_data.software_used || null,
+@@ -105,8 +114,21 @@
+               data_entry_data.revision_process || null,
+               data_entry_data.transport_responsibility || null,
+               data_entry_data.training_required || false,
+-              data_entry_data.food_location || null
++              data_entry_data.food_location || null,
++              entryFields.remarks
+             ]
++          );
++        }
++
++        // Field definitions, details, parent evaluation and images share ONE transaction.
++        if (entryFields && entryFields.fields.length > 0) {
++          await client.query(
++            `INSERT INTO "X_SalesApp".data_entry_fields
++             (evaluation_id, field_name, data_type, remarks, sort_order)
++             SELECT $1, f.field_name, f.data_type, f.remarks, f.sort_order
++             FROM jsonb_to_recordset($2::jsonb)
++               AS f(field_name text, data_type text, remarks text, sort_order integer)`,
++            [evaluationId, JSON.stringify(entryFields.fields)]
+           );
+         }
+ 
+@@ -152,11 +174,15 @@
+       }
+ 
+     } catch (error) {
++      if (error instanceof DataEntryValidationError) {
++        return res.status(400).json({ success: false, message: error.message, errors: error.details });
++      }
+       console.error('Error saving evaluation:', error);
+-      res.status(500).json({ 
+-        success: false, 
+-        message: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + error.message,
+-        error: error.message 
++      const missingMigration = req.body?.service_type === 'data_entry'
++        && ['42P01', '42703'].includes(error.code);
++      res.status(missingMigration ? 503 : 500).json({
++        success: false,
++        message: missingMigration ? DATA_ENTRY_TEXT.migrationRequired : DATA_ENTRY_TEXT.saveFailed,
+       });
+     }
+   } else if (req.method === 'GET') {
+--- a/pages/index.js
++++ b/pages/index.js
+@@ -129,13 +129,13 @@
+   // แสดงหน้ารายละเอียดการประเมิน
+   if (currentView === 'detail') {
+     return (
+-      <div style={{ 
++      <div className="print-report-page" style={{ 
+         padding: '20px', 
+         maxWidth: '1200px', 
+         margin: '0 auto',
+       }}>
+-        <div style={{ ...glassPanel }}>
+-          <GlassBlobs />
++        <div className="print-report-panel" style={{ ...glassPanel }}>
++          <div className="no-print"><GlassBlobs /></div>
+           <div style={{ position: 'relative' }}>
+             <EvaluationDetail 
+               evaluationId={selectedEvaluationId}
+--- /dev/null
++++ b/sql/003_data_entry_fields.sql
+@@ -0,0 +1,40 @@
++-- 003: Customer-requested data-entry field definitions + free-text remarks.
++-- Run the WHOLE script in DBeaver against the intended database BEFORE deploying.
++-- Take a backup first. Test against staging first. No existing rows are deleted.
++-- Assumes evaluations.id is INTEGER, as used by the existing project migrations.
++-- Execute with the schema owner; see docs/DATA_ENTRY_FIELDS.md for app-role grants.
++BEGIN;
++SET LOCAL lock_timeout = '5s';
++SET LOCAL statement_timeout = '60s';
++
++ALTER TABLE "X_SalesApp".data_entry_details
++  ADD COLUMN IF NOT EXISTS remarks TEXT NOT NULL DEFAULT '';
++
++CREATE TABLE IF NOT EXISTS "X_SalesApp".data_entry_fields (
++  id SERIAL PRIMARY KEY,
++  evaluation_id INTEGER NOT NULL
++    REFERENCES "X_SalesApp".evaluations(id) ON DELETE CASCADE,
++  field_name VARCHAR(200) NOT NULL
++    CHECK (length(btrim(field_name)) > 0),
++  data_type VARCHAR(10) NOT NULL
++    CHECK (data_type IN ('number', 'date', 'text')),
++  remarks TEXT NOT NULL DEFAULT ''
++    CHECK (char_length(remarks) <= 2000),
++  sort_order INTEGER NOT NULL
++    CHECK (sort_order BETWEEN 1 AND 100),
++  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
++  CONSTRAINT data_entry_fields_evaluation_order_unique UNIQUE (evaluation_id, sort_order)
++);
++-- The UNIQUE index already supports lookups by evaluation_id and ordered reads.
++COMMENT ON TABLE "X_SalesApp".data_entry_fields IS
++  'Customer-requested field definitions for a data-entry evaluation; not actual customer records.';
++COMMENT ON COLUMN "X_SalesApp".data_entry_details.remarks IS
++  'General free-text remarks for the data-entry evaluation.';
++COMMENT ON COLUMN "X_SalesApp".data_entry_fields.data_type IS
++  'Agreed input type label only: number, date, text. Does not create database columns.';
++COMMIT;
++
++-- If a statement fails, stop deployment, execute ROLLBACK in this same session,
++-- investigate the error, then re-run the WHOLE script. Do not continue on errors.
++-- Same-schema re-runs are supported by IF NOT EXISTS. This is NOT a schema repair
++-- script: if objects with these names already existed, compare their definitions.
+--- /dev/null
++++ b/sql/003_verify_data_entry_fields.sql
+@@ -0,0 +1,22 @@
++-- Read-only checks after migration. Run with the application's database role too.
++SELECT current_database(), current_user;
++SELECT table_name, column_name, data_type, is_nullable, column_default
++FROM information_schema.columns
++WHERE table_schema = 'X_SalesApp'
++  AND ((table_name = 'data_entry_details' AND column_name = 'remarks')
++    OR table_name = 'data_entry_fields')
++ORDER BY table_name, ordinal_position;
++
++SELECT conname, pg_get_constraintdef(oid) AS definition
++FROM pg_constraint
++WHERE conrelid = '"X_SalesApp".data_entry_fields'::regclass;
++
++SELECT
++  has_table_privilege(current_user, '"X_SalesApp".data_entry_fields', 'SELECT') AS can_read_fields,
++  has_table_privilege(current_user, '"X_SalesApp".data_entry_fields', 'INSERT') AS can_insert_fields,
++  has_sequence_privilege(current_user, '"X_SalesApp".data_entry_fields_id_seq', 'USAGE') AS can_use_sequence;
++
++-- Replace 123 with an evaluation ID saved from the new data-entry form.
++-- SELECT field_name, data_type, remarks, sort_order
++-- FROM "X_SalesApp".data_entry_fields
++-- WHERE evaluation_id = 123 ORDER BY sort_order, id;
+--- a/styles/globals.css
++++ b/styles/globals.css
+@@ -31,3 +31,45 @@
+ textarea:focus {
+   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+ }
++
++
++/* Customer-requested field definitions: form and read-only report. */
++.sr-only {
++  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
++  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
++}
++.data-entry-fields-editor {
++  margin: 28px 0 20px; padding-top: 20px; border-top: 1px solid #c7d2fe;
++}
++.data-entry-fields-heading { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
++.data-entry-fields-heading h4, .data-entry-fields-report h4 { margin: 0; color: #4338ca; font-size: 17px; }
++.data-entry-fields-count { margin-left: auto; padding: 4px 10px; border-radius: 20px; background: #e0e7ff; color: #3730a3; font-size: 12px; white-space: nowrap; }
++.data-entry-fields-help { font-size: 13px; line-height: 1.7; color: #4b5563; }
++.data-entry-fields-empty { padding: 16px; border: 1px dashed #a5b4fc; border-radius: 12px; color: #4b5563; }
++.data-entry-field-row { min-width: 0; margin: 0 0 16px; padding: 12px 14px; border: 1px solid #c7d2fe; border-radius: 14px; background: rgba(255,255,255,.35); }
++.data-entry-field-row legend { padding: 0 6px; font-weight: 600; color: #4338ca; }
++.data-entry-fields-editor label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
++.data-entry-field-inputs { display: grid; grid-template-columns: minmax(0, 1fr) 175px; gap: 12px; margin-bottom: 12px; }
++.data-entry-field-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; gap: 10px; }
++.data-entry-fields-editor small { color: #6b7280; font-size: 12px; }
++.data-entry-field-remove { padding: 6px 12px; border-radius: 8px; border: 1px solid #fecaca; background: #fff1f2; color: #9f1239; cursor: pointer; font: inherit; font-size: 13px; }
++.data-entry-fields-editor button:disabled { cursor: not-allowed; }
++.data-entry-fields-editor [aria-invalid="true"] { border-color: #dc2626 !important; }
++.data-entry-fields-errors { margin-bottom: 14px; padding: 12px; border: 1px solid #fca5a5; border-radius: 10px; background: #fff1f2; color: #991b1b; font-size: 14px; }
++.data-entry-general-remarks { margin-top: 24px; }
++.data-entry-general-remarks small { display: block; text-align: right; margin-top: 6px; }
++.data-entry-fields-report { margin: 20px 0; }
++.data-entry-fields-report h4 { margin-bottom: 12px; }
++.data-entry-fields-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 14px; line-height: 1.65; }
++.data-entry-fields-table th, .data-entry-fields-table td { border: 1px solid #cbd5e1; padding: 9px 10px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
++.data-entry-fields-table th { background: #eef2ff; color: #312e81; font-weight: 600; }
++.data-entry-fields-table td { background: rgba(255,255,255,.65); }
++.data-entry-free-text { white-space: pre-wrap; overflow-wrap: anywhere; }
++.data-entry-report-remarks { margin-top: 16px; line-height: 1.7; }
++.data-entry-report-remarks strong { display: block; margin-bottom: 4px; }
++@media (max-width: 600px) {
++  .data-entry-field-inputs { grid-template-columns: minmax(0, 1fr); }
++  .data-entry-field-row { padding: 10px; }
++  .data-entry-fields-table { font-size: 12px; }
++  .data-entry-fields-table th, .data-entry-fields-table td { padding: 6px 5px; }
++}
+--- a/styles/print.css
++++ b/styles/print.css
+@@ -53,4 +53,41 @@
+   .print-grid-item strong {
+     font-weight: bold;
+   }
+-}+}
++
++@media print {
++  /* Remove clipping/filter effects on the saved report, not the editing screens. */
++  .print-report-page, .print-report-panel, .print-report-root {
++    width: auto !important;
++    max-width: none !important;
++    margin: 0 !important;
++    padding: 0 !important;
++    overflow: visible !important;
++    border: 0 !important;
++    border-radius: 0 !important;
++    background: white !important;
++    box-shadow: none !important;
++  }
++  .print-report-root div {
++    backdrop-filter: none !important;
++    -webkit-backdrop-filter: none !important;
++    box-shadow: none !important;
++  }
++  .data-entry-fields-report, .data-entry-fields-table {
++    break-inside: auto !important;
++    page-break-inside: auto !important;
++  }
++  .data-entry-fields-table { font-size: 11px; }
++  .data-entry-fields-table thead { display: table-header-group; }
++  .data-entry-fields-table tbody { display: table-row-group; }
++  .data-entry-fields-table tr { break-inside: avoid; page-break-inside: avoid; }
++  .data-entry-fields-table th, .data-entry-fields-table td {
++    color: black !important; background: white !important; border: 1px solid #777;
++    padding: 6px 8px; overflow: visible !important; overflow-wrap: anywhere;
++  }
++  .data-entry-fields-report h4, .data-entry-report-remarks strong {
++    color: black !important; break-after: avoid; page-break-after: avoid;
++  }
++  .data-entry-report-remarks { break-inside: auto; page-break-inside: auto; }
++  .data-entry-free-text { white-space: pre-wrap !important; }
++}
+--- /dev/null
++++ b/tests/browser/build-harness.cjs
+@@ -0,0 +1,45 @@
++// Offline browser QA of real React components. Does NOT replace a Next.js build.
++// API calls are intercepted by smoke.py; never connects to the production DB.
++const fs = require('node:fs');
++const path = require('node:path');
++const babel = require('next/dist/compiled/babel/core');
++const root = path.resolve(__dirname, '../..');
++const out = path.resolve(process.argv[2] || path.join(root, '.qa-browser'));
++fs.mkdirSync(out, { recursive: true });
++const files = ['pages/index.js', 'styles/glass.js', 'lib/dataEntryFields.js', 'lib/breakdownCalculator.js',
++  ...fs.readdirSync(path.join(root, 'components')).filter((f) => f.endsWith('.js')).map((f) => `components/${f}`)];
++let bundle = 'const modules = {}; const cache = {};\n';
++for (const file of files) {
++  const code = babel.transformSync(fs.readFileSync(path.join(root,file),'utf8'), {
++    filename: path.join(root,file), configFile:false, babelrc:false,
++    presets: [[require.resolve('next/dist/compiled/babel/preset-react'), { runtime:'classic' }]],
++    plugins: [require.resolve('next/dist/compiled/babel/plugin-transform-modules-commonjs')],
++  }).code;
++  bundle += `modules[${JSON.stringify(file)}] = function(require, module, exports) {\n${code}\n};\n`;
++}
++bundle += `
++function load(name, parent='') {
++  if (name === 'react') return window.React;
++  if (name.startsWith('.')) {
++    const parts = parent.split('/'); parts.pop();
++    for (const p of name.split('/')) { if(p === '..') parts.pop(); else if (p !== '.') parts.push(p); }
++    name = parts.join('/');
++    if (!name.endsWith('.js')) name += '.js';
++  }
++  if (cache[name]) return cache[name].exports;
++  if (!modules[name]) throw new Error('Missing module: '+name);
++  const module = { exports: {} }; cache[name] = module;
++  modules[name]((target) => load(target, name), module, module.exports);
++  return module.exports;
++}
++window.fieldText = load('lib/dataEntryFields.js').DATA_ENTRY_TEXT;
++window.printCalls = 0; window.print = () => { window.printCalls++; };
++const root = ReactDOM.createRoot(document.getElementById('root'));
++root.render(React.createElement(load('pages/index.js').default));
++`;
++fs.writeFileSync(path.join(out, 'bundle.js'), bundle);
++fs.copyFileSync(path.join(root,'node_modules/react/umd/react.development.js'), path.join(out,'react.js'));
++fs.copyFileSync(path.join(root,'node_modules/react-dom/umd/react-dom.development.js'), path.join(out,'react-dom.js'));
++fs.writeFileSync(path.join(out,'style.css'), ['styles/globals.css','styles/print.css'].map((file) => fs.readFileSync(path.join(root,file),'utf8')).join('\n'));
++fs.writeFileSync(path.join(out,'index.html'), '<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Local component QA - mocked API</title></head><body><div id="root"></div><script src="react.js"></script><script src="react-dom.js"></script><script src="bundle.js"></script></body></html>');
++console.log(out);
+--- /dev/null
++++ b/tests/browser/smoke.py
+@@ -0,0 +1,192 @@
++"""Browser smoke tests of real components with MOCKED API responses.
++Usage: node tests/browser/build-harness.cjs /tmp/fields-browser
++       python tests/browser/smoke.py /tmp/fields-browser /tmp/fields-qa
++Requires playwright (Python), Chromium and PyMuPDF for PDF assertions.
++No production DB connection. No Next.js compilation is claimed by this harness.
++"""
++import base64
++import functools
++import json
++import re
++import shutil
++import sys
++import threading
++from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
++from pathlib import Path
++from playwright.sync_api import sync_playwright, expect
++
++source = Path(sys.argv[1]).resolve()
++out = Path(sys.argv[2]).resolve()
++out.mkdir(parents=True, exist_ok=True)
++html = (source/'index.html').read_text()
++html = html.replace('<link rel="stylesheet" href="style.css">', '<style>'+(source/'style.css').read_text()+'</style>')
++for filename in ['react.js','react-dom.js','bundle.js']:
++    html = html.replace(f'<script src="{filename}"></script>', '<script>(()=>{'+(source/filename).read_text()+'})()</script>')
++fetch_stub = """<script>
++window.fetch = async (url, options={}) => {
++  const payload = typeof options.body === 'string' ? JSON.parse(options.body) : null;
++  const data = await window.mockApiRequest(String(url), options.method || 'GET', payload);
++  return {ok:true, status:200, json:async()=>data};
++};
++</script>"""
++html = html.replace('<div id="root"></div>', '<div id="root"></div>'+fetch_stub)
++
++def load_page(page):
++    page.goto('about:blank')
++    page.set_content(html, wait_until='load')
++
++next_text = '\u0e16\u0e31\u0e14\u0e44\u0e1b'
++back_text = '\u0e22\u0e49\u0e2d\u0e19\u0e01\u0e25\u0e31\u0e1a'
++view_all = '\u0e14\u0e39\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e17\u0e31\u0e49\u0e07\u0e2b\u0e21\u0e14'
++view_detail = '\u0e14\u0e39\u0e23\u0e32\u0e22\u0e25\u0e30\u0e40\u0e2d\u0e35\u0e22\u0e14'
++save_text = '\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25'
++png = base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j3ioAAAAASUVORK5CYII=')
++saved = {}
++payloads = []
++base = {'evaluation_date': '2026-09-08', 'created_at': '2026-09-08T00:00:00Z', 'salesperson_name': 'Sales Demo', 'customer_name': 'Customer Demo', 'image_count': 0, 'images': []}
++saved[900] = {**base, 'id': 900, 'service_type': 'data_entry', 'service_details': {'software_used': 'Excel', 'fields': [], 'remarks': ''}}
++saved[901] = {**base, 'id': 901, 'service_type': 'scanning', 'service_details': {'doc_count': 100, 'doc_type': 'A4', 'scan_mode': 'color'}}
++
++def mock_api(url, method, body):
++    path = url.split('/api/', 1)[1]
++    if path == 'evaluations' and method == 'POST':
++        payloads.append(body)
++        saved[321] = {**base, **{k: body[k] for k in ['service_type','evaluation_date','salesperson_name','customer_name']}, 'id':321, 'service_details':body['data_entry_data']}
++        return {'success':True,'evaluation_id':321}
++    if path == 'evaluations':
++        return {'success':True, 'data':[saved[k] for k in sorted(saved)]}
++    if re.fullmatch(r'evaluations/\d+', path):
++        return {'success':True, 'data':saved[int(path.split('/')[1])]}
++    if path.startswith('breakdown/'):
++        return {'success':True,'data':None}
++    if path == 'upload':
++        return {'success':True, 'files':[{'id':1, 'name':'sample.png', 'mimetype':'image/png','size':len(png)}]}
++    raise AssertionError('Unexpected API call '+path)
++
++checks = []
++with sync_playwright() as p:
++    browser = p.chromium.launch(executable_path=shutil.which('chromium'), headless=True, args=['--no-sandbox'])
++    page = browser.new_page(viewport={'width':1280, 'height':1000}, locale='th-TH')
++    page_errors = []
++    page.on('pageerror', lambda e: page_errors.append(str(e)))
++    page.expose_function('mockApiRequest', mock_api)
++    load_page(page)
++    page.locator('h4').nth(1).click()
++    page.locator('input[type=date]').fill('2026-09-08')
++    page.get_by_role('button').nth(1).click()
++    page.locator('input[type=text]').nth(0).fill('Sales Demo')
++    page.locator('input[type=text]').nth(1).fill('Customer Demo')
++    page.locator('select').nth(0).select_option('Excel')
++    page.locator('select').nth(1).select_option(index=1)
++    page.locator('input[type=number]').nth(0).fill('10')
++    page.locator('input[type=number]').nth(1).fill('1000')
++    for index in [2,3,4]: page.locator('select').nth(index).select_option(index=1)
++    t = page.evaluate('window.fieldText')
++    add = page.get_by_role('button', name=t['add'], exact=True)
++    add.click()
++    page.get_by_role('button', name=next_text, exact=True).click()
++    expect(page.get_by_role('alert')).to_be_visible()
++    expect(page.locator('.data-entry-field-row')).to_have_count(1)
++    checks.append('blank added row blocks Next with inline validation')
++
++    names = ['\u0e40\u0e25\u0e02\u0e17\u0e35\u0e48\u0e40\u0e2d\u0e01\u0e2a\u0e32\u0e23', '\u0e27\u0e31\u0e19\u0e17\u0e35\u0e48\u0e40\u0e2d\u0e01\u0e2a\u0e32\u0e23', '\u0e08\u0e33\u0e19\u0e27\u0e19\u0e40\u0e07\u0e34\u0e19']
++    types = ['text','date','number']
++    notes = ['Keep leading zeros, e.g. 00125', 'DD/MM/YYYY\nCalendar: AD', 'Two decimal places']
++    for i in range(3):
++        if i: add.click()
++        row=page.locator('.data-entry-field-row').nth(i)
++        row.locator('input').fill(names[i])
++        row.locator('select').select_option(types[i])
++        row.locator('textarea').fill(notes[i])
++    add.click()
++    page.locator('.data-entry-field-row').nth(3).locator('input').fill('Temporary row')
++    page.locator('.data-entry-field-row').nth(3).locator('button').click()
++    expect(page.locator('.data-entry-field-row')).to_have_count(3)
++    for i in range(3):
++        expect(page.locator('.data-entry-field-row').nth(i).locator('input')).to_have_value(names[i])
++    checks.append('add/remove preserves remaining row values and order')
++    general = 'Customer-reviewed field definitions\nDo not infer unreadable values.'
++    page.locator('.data-entry-general-remarks textarea').fill(general)
++    page.locator('.data-entry-fields-editor').screenshot(path=str(out/'form-desktop.png'))
++    page.set_viewport_size({'width':390,'height':844})
++    page.locator('.data-entry-fields-editor').screenshot(path=str(out/'form-mobile.png'))
++    assert page.locator('.data-entry-field-row').first.evaluate('(e)=>e.scrollWidth<=e.clientWidth+2')
++    checks.append('field editor fits a 390px mobile viewport')
++    page.set_viewport_size({'width':1280,'height':1000})
++    page.get_by_role('button', name=next_text, exact=True).click()
++    page.get_by_role('button', name=back_text, exact=True).click()
++    expect(page.locator('.data-entry-field-row')).to_have_count(3)
++    expect(page.locator('.data-entry-general-remarks textarea')).to_have_value(general)
++    checks.append('field definitions and remarks survive back/next navigation')
++    page.get_by_role('button', name=next_text, exact=True).click()
++    page.locator('input[type=file]').set_input_files({'name':'sample.png','mimeType':'image/png','buffer':png})
++    expect(page.locator('img')).to_have_count(1)
++    page.get_by_role('button', name=next_text, exact=True).click()
++    expect(page.locator('.data-entry-fields-table tbody tr')).to_have_count(3)
++    expect(page.locator('.data-entry-fields-report')).to_contain_text(general)
++    checks.append('pre-save summary renders the same field definitions and remarks')
++    page.get_by_role('button', name=save_text, exact=True).click()
++    expect(page.get_by_role('button', name=view_all, exact=True)).to_be_visible()
++    assert len(payloads) == 1
++    assert [f['data_type'] for f in payloads[0]['data_entry_data']['fields']] == types
++    assert all('_key' not in f for f in payloads[0]['data_entry_data']['fields'])
++    checks.append('save payload includes all fields/remarks but no React keys')
++    page.get_by_role('button', name=view_all, exact=True).click()
++    page.get_by_role('button', name=view_detail, exact=True).first.click()
++    expect(page.locator('.data-entry-fields-table tbody tr')).to_have_count(3)
++    page.get_by_role('button', name=re.compile('Print')).click()
++    assert page.evaluate('window.printCalls') == 1
++    page.emulate_media(media='print')
++    expect(page.get_by_role('button', name=re.compile('Print'))).to_be_hidden()
++    assert page.locator('.data-entry-fields-table thead').evaluate('(e)=>getComputedStyle(e).display') == 'table-header-group'
++    page.pdf(path=str(out/'print-sample.pdf'), format='A4', margin={'top':'12mm','bottom':'12mm','left':'12mm','right':'12mm'})
++    checks.append('saved detail calls Print, hides controls and keeps the table in print output')
++
++    # Large-report PDF: all rows must survive multi-page printing.
++    saved[321]['service_details']['fields'] = [
++        {'field_name':f'Field {i:03d}', 'data_type':types[i % 3], 'remarks':'Line one\nLine two', 'sort_order':i}
++        for i in range(1,101)
++    ]
++    saved[321]['service_details']['fields'][40]['remarks'] = ('Long note wrapping. ' * 100).strip()
++    page.emulate_media(media='screen')
++    load_page(page)
++    page.get_by_role('button', name=view_all, exact=True).click()
++    page.get_by_role('button', name=view_detail, exact=True).first.click()
++    expect(page.locator('.data-entry-fields-table tbody tr')).to_have_count(100)
++    page.emulate_media(media='print')
++    page.pdf(path=str(out/'print-100-fields.pdf'), format='A4', margin={'top':'12mm','bottom':'12mm','left':'12mm','right':'12mm'})
++    import fitz
++    doc = fitz.open(out/'print-100-fields.pdf')
++    all_text = '\n'.join(page_.get_text() for page_ in doc)
++    for i in range(1,101): assert f'Field {i:03d}' in all_text, f'Missing printed row {i}'
++    assert len(doc) > 1
++    for page_ in doc:
++        if 'Field ' in page_.get_text(): assert 'Data Type' in page_.get_text()
++    for i in [0,1,len(doc)-1]:
++        doc[i].get_pixmap(matrix=fitz.Matrix(1.25,1.25)).save(out/f'print-100-page-{i+1}.png')
++    checks.append(f'100 fields and a long note survive {len(doc)} PDF pages with repeated headers')
++    pages = len(doc)
++    doc.close()
++    doc=fitz.open(out/'print-sample.pdf')
++    doc[0].get_pixmap(matrix=fitz.Matrix(1.5,1.5)).save(out/'print-sample-page-1.png')
++    doc.close()
++
++    # Old data-entry and scanning records still render separately.
++    page.emulate_media(media='screen')
++    load_page(page)
++    page.get_by_role('button', name=view_all, exact=True).click()
++    page.get_by_role('button', name=view_detail, exact=True).nth(1).click()
++    expect(page.locator('.data-entry-fields-table')).to_contain_text(t['empty'])
++    checks.append('legacy data-entry record displays an explicit empty field list')
++    load_page(page)
++    page.get_by_role('button', name=view_all, exact=True).click()
++    page.get_by_role('button', name=view_detail, exact=True).nth(2).click()
++    expect(page.locator('.print-report-root')).to_be_visible()
++    expect(page.locator('.data-entry-fields-table')).to_have_count(0)
++    checks.append('scanning detail does not display data-entry field definitions')
++    assert not page_errors, page_errors
++    checks.append('no browser runtime exceptions')
++    browser.close()
++result={'environment':'Chromium / React component harness; API mocked; no production DB', 'checks':checks, 'passed':len(checks), 'print_pages_100_fields':pages}
++(out/'browser-results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
++print(json.dumps(result,indent=2))
+--- /dev/null
++++ b/tests/data-entry-fields.test.cjs
+@@ -0,0 +1,65 @@
++const test = require('node:test');
++const assert = require('node:assert/strict');
++const { validateDataEntryFields: validate, DataEntryValidationError, DATA_ENTRY_LIMITS: limits } = require('../lib/dataEntryFields');
++const field = (overrides = {}) => ({ field_name: 'Document ID', data_type: 'text', remarks: '', ...overrides });
++const fails = (input, path) => assert.throws(() => validate(input), (error) => error instanceof DataEntryValidationError && error.details.some((item) => item.path === path));
++
++test('old payload without new properties remains valid', () => assert.deepEqual(validate({ software_used: 'Excel' }), { fields: [], remarks: '' }));
++test('all three types and original order are preserved', () => {
++  const result = validate({ fields: ['number', 'date', 'text'].map((data_type) => field({ data_type })) });
++  assert.deepEqual(result.fields.map((f) => f.data_type), ['number', 'date', 'text']);
++  assert.deepEqual(result.fields.map((f) => f.sort_order), [1, 2, 3]);
++});
++test('normalization trims names and strips client keys / supplied order', () => {
++  assert.deepEqual(validate({ fields: [field({ field_name: '  ID  ', _key: 'local', sort_order: 99, id: 6 })] }).fields,
++    [{ field_name: 'ID', data_type: 'text', remarks: '', sort_order: 1 }]);
++});
++test('Thai and multiline free text survive without HTML interpolation', () => {
++  const note = '\u0e2b\u0e21\u0e32\u0e22\u0e40\u0e2b\u0e15\u0e38\n<script>alert(1)</script>';
++  const result = validate({ fields: [field({ remarks: note })], remarks: note });
++  assert.equal(result.fields[0].remarks, note);
++  assert.equal(result.remarks, note);
++});
++test('line endings normalize but spaces and blank lines are retained', () => {
++  const result = validate({ fields: [field({ remarks: ' A\r\n\r\nB\rC ' })], remarks: 'x\r\ny' });
++  assert.equal(result.fields[0].remarks, ' A\n\nB\nC ');
++  assert.equal(result.remarks, 'x\ny');
++});
++test('general remarks can be provided without any fields', () => assert.equal(validate({ remarks: 'Terms' }).remarks, 'Terms'));
++test('invalid data-entry object is rejected', () => [null, undefined, [], 7, 'data'].forEach((input) => fails(input, 'data_entry_data')));
++test('fields must be an array when supplied', () => [null, {}, '[]', 1].forEach((fields) => fails({ fields }, 'fields')));
++test('every row must be an object', () => [null, [], 7, 'text'].forEach((value) => fails({ fields: [value] }, 'fields.0')));
++test('empty, missing and whitespace-only field names are rejected', () => ['', '  \n ', null, undefined].forEach((name) => fails({ fields: [field({ field_name: name })] }, 'fields.0.field_name')));
++test('names cannot be objects or numbers', () => [42, {}, []].forEach((name) => fails({ fields: [field({ field_name: name })] }, 'fields.0.field_name')));
++test('unsupported and missing data types are rejected', () => ['boolean', 'Date', '', null, undefined, {}, "text'); DROP TABLE x; --"].forEach((data_type) => fails({ fields: [field({ data_type })] }, 'fields.0.data_type')));
++test('remarks must be text; omitted/null remarks normalize to empty', () => {
++  fails({ remarks: { text: 'x' } }, 'remarks');
++  fails({ fields: [field({ remarks: 42 })] }, 'fields.0.remarks');
++  assert.equal(validate({ fields: [field({ remarks: null })], remarks: null }).fields[0].remarks, '');
++});
++test('null bytes cannot reach PostgreSQL text columns', () => {
++  fails({ remarks: 'a\0b' }, 'remarks');
++  fails({ fields: [field({ field_name: 'a\0b' })] }, 'fields.0.field_name');
++  fails({ fields: [field({ remarks: 'a\0b' })] }, 'fields.0.remarks');
++});
++test('field count accepts the boundary and rejects overflow', () => {
++  assert.equal(validate({ fields: Array.from({ length: limits.fields }, () => field()) }).fields.length, limits.fields);
++  fails({ fields: Array.from({ length: limits.fields + 1 }, () => field()) }, 'fields');
++});
++test('name length accepts the boundary and rejects overflow', () => {
++  assert.equal(validate({ fields: [field({ field_name: 'a'.repeat(limits.fieldName) })] }).fields[0].field_name.length, limits.fieldName);
++  fails({ fields: [field({ field_name: 'a'.repeat(limits.fieldName + 1) })] }, 'fields.0.field_name');
++});
++test('per-field remarks enforce their length bound', () => {
++  assert.equal(validate({ fields: [field({ remarks: 'a'.repeat(limits.fieldRemarks) })] }).fields[0].remarks.length, limits.fieldRemarks);
++  fails({ fields: [field({ remarks: 'a'.repeat(limits.fieldRemarks + 1) })] }, 'fields.0.remarks');
++});
++test('general remarks enforce their length bound', () => {
++  assert.equal(validate({ remarks: 'a'.repeat(limits.remarks) }).remarks.length, limits.remarks);
++  fails({ remarks: 'a'.repeat(limits.remarks + 1) }, 'remarks');
++});
++test('validation does not mutate its input', () => {
++  const input = Object.freeze({ fields: Object.freeze([Object.freeze(field({ field_name: ' ID ' }))]) });
++  validate(input);
++  assert.equal(input.fields[0].field_name, ' ID ');
++});
+--- /dev/null
++++ b/tests/evaluations-api.test.cjs
+@@ -0,0 +1,134 @@
++const test = require('node:test');
++const assert = require('node:assert/strict');
++const { load } = require('./support/load.cjs');
++const { DATA_ENTRY_TEXT } = require('../lib/dataEntryFields');
++function response() {
++  return { code: 200, headers: {}, status(value) { this.code = value; return this; }, json(value) { this.body = value; return this; }, setHeader(k,v) { this.headers[k]=v; }, end(value) { this.body=value; } };
++}
++function dbMock({ failOn, failCode, rowsFor, connectionError } = {}) {
++  const calls = []; let connected = 0; let released = 0;
++  async function query(sql, params) {
++    calls.push({ sql, params });
++    if (failOn && sql.includes(failOn)) throw Object.assign(new Error('private failure detail'), { code: failCode || 'XX000' });
++    if (rowsFor) return { rows: rowsFor(sql, params) || [] };
++    if (sql.includes('INSERT INTO "X_SalesApp".evaluations')) return { rows: [{ id: 321 }] };
++    if (sql.includes('SELECT filename, mime_type, file_data')) return { rows: [{ filename: 'test.png', mime_type: 'image/png', file_data: 'test' }] };
++    return { rows: [] };
++  }
++  const db = { query, pool: { async connect() { connected++; if (connectionError) throw new Error('private password'); return { query, release() { released++; } }; } } };
++  return { db, calls, get connected() { return connected; }, get released() { return released; } };
++}
++const entry = (extra = {}) => ({ service_type: 'data_entry', evaluation_date: '2026-09-08', salesperson_name: 'Test', customer_name: 'Demo', data_entry_data: { software_used: 'Excel', fields: [{ field_name: 'Amount', data_type: 'number', remarks: 'Two decimal places' }, { field_name: 'Date', data_type: 'date', remarks: 'DD/MM/YYYY' }], remarks: 'Agreed\nNotes' }, images: [], ...extra });
++async function post(body, options = {}) {
++  const mock = dbMock(options), res = response();
++  await load('pages/api/evaluations.js', { 'lib/db.js': mock.db }).default({ method: 'POST', body }, res);
++  return { mock, res };
++}
++test('POST saves details, ordered fields and general remarks before one commit', async () => {
++  const { mock, res } = await post(entry());
++  assert.equal(res.code, 200); assert.equal(res.body.evaluation_id, 321);
++  assert.equal(mock.connected, 1); assert.equal(mock.released, 1);
++  assert.equal(mock.calls[0].sql, 'BEGIN'); assert.equal(mock.calls.at(-1).sql, 'COMMIT');
++  const details = mock.calls.find((c) => c.sql.includes('INSERT INTO "X_SalesApp".data_entry_details'));
++  assert.equal(details.params.length, 14); assert.equal(details.params[13], 'Agreed\nNotes');
++  const fields = mock.calls.find((c) => c.sql.includes('INSERT INTO "X_SalesApp".data_entry_fields'));
++  assert.equal(fields.params[0], 321);
++  assert.deepEqual(JSON.parse(fields.params[1]).map((f) => f.sort_order), [1,2]);
++});
++test('field names and remarks are bound parameters, never SQL identifiers', async () => {
++  const malicious = "Robert'); DROP TABLE evaluations; --";
++  const { mock, res } = await post(entry({ data_entry_data: { fields: [{ field_name: malicious, data_type: 'text', remarks: malicious }] } }));
++  assert.equal(res.code, 200);
++  assert.ok(mock.calls.every((c) => !c.sql.includes(malicious)));
++  assert.equal(JSON.parse(mock.calls.find((c) => c.sql.includes('jsonb_to_recordset')).params[1])[0].field_name, malicious);
++});
++test('old data-entry payload inserts empty remarks and no child fields', async () => {
++  const { mock, res } = await post(entry({ data_entry_data: { software_used: 'Excel' } }));
++  assert.equal(res.code, 200);
++  assert.ok(!mock.calls.some((c) => c.sql.includes('data_entry_fields')));
++  assert.equal(mock.calls.find((c) => c.sql.includes('data_entry_details')).params[13], '');
++});
++test('scan request uses its original detail path only', async () => {
++  const { mock, res } = await post(entry({ service_type: 'scanning', data_entry_data: null, scanning_data: { document_sizes: [{ doc_type: 'A4', doc_count: '100' }, { doc_type: 'A3', doc_count: '25' }], scan_mode: 'color' } }));
++  assert.equal(res.code, 200);
++  assert.ok(!mock.calls.some((c) => c.sql.includes('data_entry')));
++  assert.equal(mock.calls.find((c) => c.sql.includes('scanning_details')).params[1], 125);
++});
++test('malformed fields fail with 400 before any database connection', async () => {
++  const { mock, res } = await post(entry({ data_entry_data: { fields: [{ field_name: '', data_type: 'boolean' }] } }));
++  assert.equal(res.code, 400); assert.equal(mock.connected, 0); assert.ok(res.body.errors.length >= 2);
++});
++test('malformed body / missing details / unknown service do not write rows', async () => {
++  for (const body of [null, [], 'text', entry({ data_entry_data: null }), entry({ service_type: 'unknown' })]) {
++    const { mock, res } = await post(body);
++    assert.equal(res.code, 400); assert.equal(mock.connected, 0);
++  }
++});
++test('a field insert failure rolls back the parent and releases the client', async () => {
++  const { mock, res } = await post(entry(), { failOn: 'INSERT INTO "X_SalesApp".data_entry_fields' });
++  assert.equal(res.code, 500); assert.equal(mock.calls.at(-1).sql, 'ROLLBACK');
++  assert.ok(!mock.calls.some((c) => c.sql === 'COMMIT')); assert.equal(mock.released, 1);
++  assert.ok(!JSON.stringify(res.body).includes('private failure'));
++});
++test('a later image failure also rolls back field definitions', async () => {
++  const { mock, res } = await post(entry({ images: [{ id: 1 }] }), { failOn: 'INSERT INTO "X_SalesApp".evaluation_images' });
++  assert.equal(res.code, 500); assert.ok(mock.calls.some((c) => c.sql.includes('jsonb_to_recordset')));
++  assert.equal(mock.calls.at(-1).sql, 'ROLLBACK'); assert.equal(mock.released, 1);
++});
++test('successful image transfer stays inside the same transaction', async () => {
++  const { mock, res } = await post(entry({ images: [{ id: 1 }] }));
++  assert.equal(res.code, 200); assert.equal(mock.connected, 1); assert.equal(mock.calls.at(-1).sql, 'COMMIT');
++  assert.ok(mock.calls.some((c) => c.sql.includes('DELETE FROM "X_SalesApp".temp_images')));
++});
++test('missing migration returns actionable 503 and rolls back', async () => {
++  for (const failCode of ['42P01','42703']) {
++    const { mock, res } = await post(entry(), { failOn: 'data_entry_details', failCode });
++    assert.equal(res.code, 503); assert.equal(res.body.message, DATA_ENTRY_TEXT.migrationRequired);
++    assert.equal(mock.calls.at(-1).sql, 'ROLLBACK');
++  }
++});
++test('connection failures return a safe message', async () => {
++  const { res } = await post(entry(), { connectionError: true });
++  assert.equal(res.code, 500); assert.ok(!JSON.stringify(res.body).includes('private password'));
++});
++async function detail({ service = 'data_entry', fields = [], exists = true, failOn, failCode } = {}) {
++  const mock = dbMock({ failOn, failCode, rowsFor(sql) {
++    if (sql.includes('FROM "X_SalesApp".evaluations')) return exists ? [{ id: 321, service_type: service }] : [];
++    if (sql.includes('FROM "X_SalesApp".data_entry_fields')) return fields;
++    if (sql.includes('FROM "X_SalesApp".data_entry_details')) return [{ software_used: 'Excel', remarks: 'Agreed' }];
++    if (sql.includes('FROM "X_SalesApp".scanning_details')) return [{ doc_count: 100 }];
++    return [];
++  } });
++  const res = response();
++  await load('pages/api/evaluations/[id].js', { 'lib/db.js': mock.db }).default({ method: 'GET', query: { id: '321' } }, res);
++  return { mock, res };
++}
++test('GET returns stored fields and explicitly orders by sort_order and id', async () => {
++  const fields = [{ id: 7, field_name: 'ID', data_type: 'text', remarks: '', sort_order: 1 }];
++  const { mock, res } = await detail({ fields });
++  assert.equal(res.code, 200); assert.deepEqual(res.body.data.service_details.fields, fields);
++  assert.equal(res.body.data.service_details.remarks, 'Agreed');
++  const read = mock.calls.find((c) => c.sql.includes('data_entry_fields'));
++  assert.match(read.sql, /ORDER BY sort_order ASC, id ASC/); assert.deepEqual(read.params, ['321']);
++});
++test('GET old evaluation returns empty list, not an error', async () => {
++  const { res } = await detail(); assert.deepEqual(res.body.data.service_details.fields, []);
++});
++test('GET scan evaluation does not query the new table', async () => {
++  const { mock, res } = await detail({ service: 'scanning' });
++  assert.equal(res.code, 200); assert.ok(!mock.calls.some((c) => c.sql.includes('data_entry')));
++});
++test('GET unknown evaluation remains 404', async () => {
++  const { mock, res } = await detail({ exists: false }); assert.equal(res.code, 404); assert.equal(mock.calls.length, 1);
++});
++test('GET missing fields table fails clearly rather than printing an empty agreement', async () => {
++  const { res } = await detail({ failOn: 'data_entry_fields', failCode: '42P01' });
++  assert.equal(res.code, 503); assert.equal(res.body.message, DATA_ENTRY_TEXT.migrationRequired);
++});
++test('unsupported methods remain 405 without DB access', async () => {
++  for (const file of ['pages/api/evaluations.js', 'pages/api/evaluations/[id].js']) {
++    const mock = dbMock(), res = response();
++    await load(file, { 'lib/db.js': mock.db }).default({ method: 'DELETE', query: { id: '321' } }, res);
++    assert.equal(res.code, 405); assert.equal(mock.calls.length, 0);
++  }
++});
+--- /dev/null
++++ b/tests/fields-table.test.cjs
+@@ -0,0 +1,22 @@
++const test = require('node:test');
++const assert = require('node:assert/strict');
++const React = require('react');
++const { renderToStaticMarkup } = require('react-dom/server');
++const { load } = require('./support/load.cjs');
++const { DATA_ENTRY_TEXT: t } = require('../lib/dataEntryFields');
++const Table = load('components/DataEntryFieldsTable.js').default;
++test('printed table contains four columns, all types and multiline notes', () => {
++  const html = renderToStaticMarkup(React.createElement(Table, { fields: ['number','date','text'].map((data_type, i) => ({ field_name: 'Field '+i, data_type, remarks: 'Line one\nLine two' })), remarks: 'General\nTerms' }));
++  assert.equal((html.match(/<th /g) || []).length, 4);
++  for (const type of ['number','date','text']) assert.ok(html.includes(t[type]));
++  assert.ok(html.includes('Line one\nLine two')); assert.ok(html.includes('General\nTerms'));
++});
++test('table escapes malicious HTML as text', () => {
++  const html = renderToStaticMarkup(React.createElement(Table, { fields: [{ field_name: '<img src=x onerror=alert(1)>', data_type: 'text', remarks: '<script>bad()</script>' }], remarks: '<b>plain text</b>' }));
++  assert.ok(!html.includes('<script>')); assert.ok(!html.includes('<img src=x'));
++  assert.ok(html.includes('&lt;script&gt;')); assert.ok(html.includes('&lt;b&gt;plain text&lt;/b&gt;'));
++});
++test('legacy empty table displays an explicit empty state', () => {
++  const html = renderToStaticMarkup(React.createElement(Table));
++  assert.ok(html.includes(t.empty)); assert.ok(html.includes('colSpan="4"') || html.includes('colspan="4"'));
++});
+--- /dev/null
++++ b/tests/support/load.cjs
+@@ -0,0 +1,36 @@
++// Transpile the project's existing ES modules / JSX with Next's bundled Babel.
++// No production DB module is loaded: API tests MUST provide a db mock.
++const fs = require('node:fs');
++const path = require('node:path');
++const vm = require('node:vm');
++const { createRequire } = require('node:module');
++const babel = require('next/dist/compiled/babel/core');
++const root = path.resolve(__dirname, '../..');
++const compiled = new Map();
++function load(relative, mocks = {}) {
++  const cache = new Map();
++  function read(file) {
++    file = path.resolve(file);
++    const key = path.relative(root, file).replaceAll(path.sep, '/');
++    if (Object.hasOwn(mocks, key)) return mocks[key];
++    if (file === path.join(root, 'lib/db.js')) throw new Error('Production database access is prohibited in tests.');
++    if (cache.has(file)) return cache.get(file).exports;
++    if (file.includes(`${path.sep}node_modules${path.sep}`) || file.endsWith('lib/dataEntryFields.js')) return require(file);
++    const m = { exports: {} };
++    cache.set(file, m);
++    if (!compiled.has(file)) {
++      compiled.set(file, babel.transformSync(fs.readFileSync(file, 'utf8'), {
++        filename: file, configFile: false, babelrc: false,
++        presets: [[require.resolve('next/dist/compiled/babel/preset-react'), { runtime: 'automatic' }]],
++        plugins: [require.resolve('next/dist/compiled/babel/plugin-transform-modules-commonjs')],
++      }).code);
++    }
++    const nativeRequire = createRequire(file);
++    const localRequire = (name) => name.startsWith('.') ? read(nativeRequire.resolve(name)) : nativeRequire(name);
++    const fn = vm.runInThisContext(`(function(require,module,exports,__filename,__dirname,console){${compiled.get(file)}\n})`, { filename: file });
++    fn(localRequire, m, m.exports, file, path.dirname(file), { ...console, error() {} });
++    return m.exports;
++  }
++  return read(path.join(root, relative));
++}
++module.exports = { load };
