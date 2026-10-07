@@ -9,7 +9,8 @@ import SaveSuccess from '../components/SaveSuccess';
 import EvaluationList from '../components/EvaluationList';
 import EvaluationDetail from '../components/EvaluationDetail';
 import CostSettingsPage from '../components/CostSettingsPage';
-import { glassPanel, glassCard, glassButton, buttonColors, hoverLift, hoverReset, GlassBlobs } from '../styles/glass';
+import AppShell from '../components/AppShell';
+import { glassPanel, glassButton, buttonColors, hoverLift, hoverReset } from '../styles/glass';
 
 export default function Home() {
   const [selectedService, setSelectedService] = useState('');
@@ -92,58 +93,43 @@ export default function Home() {
     setSelectedEvaluationId(null);
   };
 
+  const handleNavigate = (key) => {
+    if (key === 'list') setSelectedEvaluationId(null);
+    setCurrentView(key);
+  };
+
   // แสดงหน้าตั้งค่าอัตราต้นทุน
   if (currentView === 'settings') {
     return (
-      <div style={{
-        padding: '20px',
-        maxWidth: '900px',
-        margin: '0 auto',
-      }}>
-        <CostSettingsPage onBack={handleBackToMain} />
-      </div>
+      <AppShell active="settings" title="ตั้งค่าต้นทุน" subtitle="อัตราต้นทุนมาตรฐานที่ใช้คำนวณ Breakdown Cost" onNavigate={handleNavigate}>
+        <div style={glassPanel}>
+          <CostSettingsPage onBack={handleBackToMain} />
+        </div>
+      </AppShell>
     );
   }
 
   // แสดงหน้าแสดงข้อมูลทั้งหมด
   if (currentView === 'list') {
     return (
-      <div style={{ 
-        padding: '20px', 
-        maxWidth: '1200px', 
-        margin: '0 auto',
-      }}>
-        <div style={{ ...glassPanel }}>
-          <GlassBlobs variant="reverse" />
-          <div style={{ position: 'relative' }}>
-            <EvaluationList 
-              onBack={handleBackToMain}
-              onViewDetail={handleViewDetail}
-            />
-          </div>
+      <AppShell active="list" title="ข้อมูลการประเมิน" subtitle="รายการประเมินทั้งหมดที่บันทึกไว้" onNavigate={handleNavigate}>
+        <div style={glassPanel}>
+          <EvaluationList onBack={handleBackToMain} onViewDetail={handleViewDetail} />
         </div>
-      </div>
+      </AppShell>
     );
   }
 
   // แสดงหน้ารายละเอียดการประเมิน
   if (currentView === 'detail') {
     return (
-      <div className="print-report-page" style={{ 
-        padding: '20px', 
-        maxWidth: '1200px', 
-        margin: '0 auto',
-      }}>
-        <div className="print-report-panel" style={{ ...glassPanel }}>
-          <div className="no-print"><GlassBlobs /></div>
-          <div style={{ position: 'relative' }}>
-            <EvaluationDetail 
-              evaluationId={selectedEvaluationId}
-              onBack={handleBackToList}
-            />
+      <AppShell active="list" title="รายละเอียดการประเมิน" subtitle={`รหัสการประเมิน #${selectedEvaluationId}`} onNavigate={handleNavigate}>
+        <div className="print-report-page">
+          <div className="print-report-panel" style={glassPanel}>
+            <EvaluationDetail evaluationId={selectedEvaluationId} onBack={handleBackToList} />
           </div>
         </div>
-      </div>
+      </AppShell>
     );
   }
 
@@ -161,31 +147,13 @@ export default function Home() {
               selectedDate={evaluationDate}
               onDateChange={setEvaluationDate}
             />
-            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-              <button
-                onClick={handleViewAll}
-                style={{ ...glassButton(...buttonColors.success), flex: '1' }}
-                onMouseOver={hoverLift}
-                onMouseOut={hoverReset}
-              >
-                ดูข้อมูลทั้งหมด
-              </button>
-              <button
-                onClick={handleServiceNext}
-                style={{ ...glassButton(...buttonColors.primary), flex: '2' }}
-                onMouseOver={hoverLift}
-                onMouseOut={hoverReset}
-              >
-                เริ่มประเมินใหม่
-              </button>
-            </div>
             <button
-              onClick={() => setCurrentView('settings')}
-              style={{ ...glassButton(...buttonColors.neutral), width: '100%', marginTop: '10px', opacity: 0.85 }}
+              onClick={handleServiceNext}
+              style={{ ...glassButton(...buttonColors.primary), width: '100%', marginTop: '8px', padding: '13px 18px', fontSize: '15px' }}
               onMouseOver={hoverLift}
               onMouseOut={hoverReset}
             >
-              ⚙️ ตั้งค่าอัตราต้นทุน (Breakdown Cost)
+              เริ่มประเมิน
             </button>
           </div>
         );
@@ -249,69 +217,33 @@ export default function Home() {
     }
   };
 
+  const steps = ['เลือกบริการ', 'กรอกข้อมูล', 'แนบรูปภาพ', 'สรุปผล'];
+
   return (
-    <div style={{ 
-      padding: '20px', 
-      maxWidth: '800px', 
-      margin: '0 auto',
-    }}>
-      <div style={glassPanel}>
-        <GlassBlobs />
-        <div style={{ position: 'relative' }}>
-          <h1 style={{ 
-            textAlign: 'center', 
-            marginBottom: '26px',
-            color: '#1f2937',
-            fontSize: '24px'
-          }}>
-            ระบบบันทึกข้อมูล Sales
-          </h1>
+    <AppShell
+      active="main"
+      title="ระบบบันทึกข้อมูลการประเมินหน้างาน"
+      subtitle="ประเมินหน้างานสแกนเอกสารและบันทึกข้อมูล เพื่อใช้คำนวณราคา"
+      onNavigate={handleNavigate}
+    >
+      {currentStep < 5 && (
+        <ol className="app-steps" aria-label="ขั้นตอน" style={{ listStyle: 'none', padding: 0 }}>
+          {steps.map((label, i) => {
+            const n = i + 1;
+            const state = n === currentStep ? ' is-current' : n < currentStep ? ' is-done' : '';
+            return (
+              <li key={label} className={`app-step${state}`} aria-current={n === currentStep ? 'step' : undefined}>
+                <span className="app-step-num">{n < currentStep ? '✓' : n}</span>
+                {label}
+              </li>
+            );
+          })}
+        </ol>
+      )}
 
-          {/* Progress Bar */}
-          {currentStep < 5 && (
-            <div style={{ ...glassCard, padding: '14px 16px', marginBottom: '26px' }}>
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '6px',
-              }}>
-                <span style={{ 
-                  color: currentStep >= 1 ? '#4338ca' : '#9ca3af',
-                  fontWeight: currentStep >= 1 ? 'bold' : 'normal',
-                  fontSize: '13px',
-                }}>
-                  1. เลือกบริการ
-                </span>
-                <span style={{ 
-                  color: currentStep >= 2 ? '#4338ca' : '#9ca3af',
-                  fontWeight: currentStep >= 2 ? 'bold' : 'normal',
-                  fontSize: '13px',
-                }}>
-                  2. กรอกข้อมูล
-                </span>
-                <span style={{ 
-                  color: currentStep >= 3 ? '#4338ca' : '#9ca3af',
-                  fontWeight: currentStep >= 3 ? 'bold' : 'normal',
-                  fontSize: '13px',
-                }}>
-                  3. แนบรูปภาพ
-                </span>
-                <span style={{ 
-                  color: currentStep >= 4 ? '#4338ca' : '#9ca3af',
-                  fontWeight: currentStep >= 4 ? 'bold' : 'normal',
-                  fontSize: '13px',
-                }}>
-                  4. สรุปผล
-                </span>
-              </div>
-            </div>
-          )}
-
-          {renderCurrentStep()}
-        </div>
+      <div style={{ ...glassPanel, maxWidth: '860px' }}>
+        {renderCurrentStep()}
       </div>
-    </div>
+    </AppShell>
   );
 }

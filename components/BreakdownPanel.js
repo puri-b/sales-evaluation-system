@@ -9,14 +9,14 @@ function GroupTable({ title, group }) {
   if (!group) return null;
   return (
     <div style={glassCard}>
-      <div style={{ fontWeight: 700, color: '#3730a3', marginBottom: '8px', fontSize: '15px' }}>{title}</div>
+      <div style={{ fontWeight: 700, color: '#3d2459', marginBottom: '8px', fontSize: '15px' }}>{title}</div>
       {group.items.map((item, idx) => (
         <div key={idx} style={rowStyle}>
           <div>
-            <div style={{ color: '#1f2937' }}>{item.label}</div>
-            <div style={{ fontSize: '12px', color: '#8b8fa3' }}>{item.rateLabel}</div>
+            <div style={{ color: '#221a2e' }}>{item.label}</div>
+            <div style={{ fontSize: '12px', color: '#6f6a7a' }}>{item.rateLabel}</div>
           </div>
-          <div style={{ fontWeight: 600, whiteSpace: 'nowrap', color: '#374151' }}>
+          <div style={{ fontWeight: 600, whiteSpace: 'nowrap', color: '#3a3346' }}>
             {formatBaht(item.total)} ฿
           </div>
         </div>
@@ -34,8 +34,8 @@ function StatChip({ icon, label, value }) {
     <div style={statChipStyle}>
       <div style={{ fontSize: '20px' }}>{icon}</div>
       <div>
-        <div style={{ fontSize: '12px', color: '#8b8fa3' }}>{label}</div>
-        <div style={{ fontSize: '15px', fontWeight: 700, color: '#1f2937' }}>{value}</div>
+        <div style={{ fontSize: '12px', color: '#6f6a7a' }}>{label}</div>
+        <div style={{ fontSize: '15px', fontWeight: 700, color: '#221a2e' }}>{value}</div>
       </div>
     </div>
   );
@@ -146,7 +146,7 @@ export default function BreakdownPanel({ evaluationId, serviceType }) {
   if (loading) {
     return (
       <div style={{ ...glassPanel, marginBottom: '20px' }}>
-        <p style={{ color: '#8b8fa3', margin: 0 }}>กำลังตรวจสอบข้อมูล Breakdown...</p>
+        <p style={{ color: '#6f6a7a', margin: 0 }}>กำลังตรวจสอบข้อมูล Breakdown...</p>
       </div>
     );
   }
@@ -161,7 +161,7 @@ export default function BreakdownPanel({ evaluationId, serviceType }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
           <div style={glassTitlePill}>
             <span style={{ fontSize: '20px' }}>💰</span>
-            <h3 style={{ color: '#1f2937', margin: 0, fontSize: '17px', fontWeight: 700 }}>Breakdown Cost (เบื้องต้น)</h3>
+            <h3 style={{ color: '#221a2e', margin: 0, fontSize: '17px', fontWeight: 700 }}>Breakdown Cost (เบื้องต้น)</h3>
           </div>
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <button
@@ -197,12 +197,12 @@ export default function BreakdownPanel({ evaluationId, serviceType }) {
 
         {showOverrides && (
           <div style={glassCard}>
-            <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '12px' }}>
+            <div style={{ fontSize: '13px', color: '#6f6a7a', marginBottom: '12px' }}>
               เว้นว่างไว้ = ให้ระบบประมาณการให้อัตโนมัติ / ใช้ค่าเริ่มต้นจากหน้าตั้งค่าต้นทุน
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
               <div>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: '#4b5563' }}>จำนวนคน (Override)</label>
+                <label style={{ fontSize: '13px', fontWeight: 600, color: '#4a4456' }}>จำนวนคน (Override)</label>
                 <input
                   type="number"
                   style={{ ...glassInput, marginTop: '4px' }}
@@ -212,7 +212,7 @@ export default function BreakdownPanel({ evaluationId, serviceType }) {
                 />
               </div>
               <div>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: '#4b5563' }}>ระยะเวลาสัญญา (เดือน)</label>
+                <label style={{ fontSize: '13px', fontWeight: 600, color: '#4a4456' }}>ระยะเวลาสัญญา (เดือน)</label>
                 <input
                   type="number"
                   style={{ ...glassInput, marginTop: '4px' }}
@@ -222,7 +222,7 @@ export default function BreakdownPanel({ evaluationId, serviceType }) {
                 />
               </div>
               <div>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: '#4b5563' }}>% กำไรเป้าหมาย (GP)</label>
+                <label style={{ fontSize: '13px', fontWeight: 600, color: '#4a4456' }}>% กำไรเป้าหมาย (GP)</label>
                 <input
                   type="number"
                   style={{ ...glassInput, marginTop: '4px' }}
@@ -232,7 +232,7 @@ export default function BreakdownPanel({ evaluationId, serviceType }) {
                 />
               </div>
               <div>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: '#4b5563' }}>% ความเสี่ยง (Risk)</label>
+                <label style={{ fontSize: '13px', fontWeight: 600, color: '#4a4456' }}>% ความเสี่ยง (Risk)</label>
                 <input
                   type="number"
                   style={{ ...glassInput, marginTop: '4px' }}
@@ -253,7 +253,7 @@ export default function BreakdownPanel({ evaluationId, serviceType }) {
 
         {!breakdown && !error && (
           <div style={glassCard}>
-            <p style={{ color: '#8b8fa3', fontSize: '14px', margin: 0 }}>
+            <p style={{ color: '#6f6a7a', fontSize: '14px', margin: 0 }}>
               ยังไม่มีการคำนวณ Breakdown Cost สำหรับรายการนี้ — กดปุ่ม &quot;คำนวณ Breakdown Cost&quot; ด้านบนเพื่อเริ่ม
             </p>
           </div>
@@ -296,7 +296,7 @@ export default function BreakdownPanel({ evaluationId, serviceType }) {
             <div style={{
               ...glassCard,
               marginTop: '4px',
-              background: 'rgba(255,255,255,0.65)',
+              background: '#ffffff',
             }}>
               <div style={rowStyle}>
                 <div>ต้นทุนรวม (ไม่รวม Risk)</div>
@@ -314,11 +314,11 @@ export default function BreakdownPanel({ evaluationId, serviceType }) {
                 <div>กำไร (GP {breakdown.summary.gpRatePercent}%)</div>
                 <div>{formatBaht(breakdown.summary.profitAmount)} ฿</div>
               </div>
-              <div style={{ ...rowStyle, fontWeight: 700, fontSize: '16px', color: '#4338ca' }}>
+              <div style={{ ...rowStyle, fontWeight: 700, fontSize: '16px', color: '#3d2459' }}>
                 <div>ราคาขาย (ไม่รวม VAT)</div>
                 <div>{formatBaht(breakdown.summary.sellingPrice)} ฿</div>
               </div>
-              <div style={{ ...rowStyle, fontSize: '13px', color: '#6b7280' }}>
+              <div style={{ ...rowStyle, fontSize: '13px', color: '#6f6a7a' }}>
                 <div>ราคาขาย / {unitLabel} (ไม่รวม VAT)</div>
                 <div>{formatBaht(breakdown.summary.pricePerUnit)} ฿</div>
               </div>
@@ -326,18 +326,18 @@ export default function BreakdownPanel({ evaluationId, serviceType }) {
                 <div>VAT ({breakdown.summary.vatRatePercent}%)</div>
                 <div>{formatBaht(breakdown.summary.vatAmount)} ฿</div>
               </div>
-              <div style={{ ...rowStyle, fontSize: '13px', color: '#6b7280' }}>
+              <div style={{ ...rowStyle, fontSize: '13px', color: '#6f6a7a' }}>
                 <div>ราคาขาย / {unitLabel} (รวม VAT)</div>
                 <div>{formatBaht(breakdown.summary.pricePerUnitWithVat)} ฿</div>
               </div>
               <div style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 marginTop: '10px', padding: '14px 18px', borderRadius: '16px',
-                background: 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(5,150,105,0.10))',
-                border: '1px solid rgba(16,185,129,0.3)',
+                background: '#e6faf6',
+                border: '1px solid #bfeee3',
               }}>
-                <div style={{ fontWeight: 700, fontSize: '16px', color: '#065f46' }}>ราคาขายรวม VAT</div>
-                <div style={{ fontWeight: 800, fontSize: '19px', color: '#047857' }}>{formatBaht(breakdown.summary.priceWithVat)} ฿</div>
+                <div style={{ fontWeight: 700, fontSize: '16px', color: '#0f5a4e' }}>ราคาขายรวม VAT</div>
+                <div style={{ fontWeight: 800, fontSize: '19px', color: '#0f5a4e' }}>{formatBaht(breakdown.summary.priceWithVat)} ฿</div>
               </div>
             </div>
 

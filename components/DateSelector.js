@@ -5,7 +5,7 @@ export default function DateSelector({ selectedDate, onDateChange }) {
 
   return (
     <div style={{ marginBottom: '26px' }}>
-      <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#1f2937' }}>
+      <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#221a2e' }}>
         วันที่เข้าประเมินหน้างาน
       </label>
       <input

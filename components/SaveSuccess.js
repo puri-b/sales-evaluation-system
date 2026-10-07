@@ -11,10 +11,10 @@ export default function SaveSuccess({ evaluationId, onNewEvaluation, onViewAll }
       </div>
 
       <div style={glassCard}>
-        <h4 style={{ marginTop: 0, marginBottom: '10px', color: '#1f2937' }}>
+        <h4 style={{ marginTop: 0, marginBottom: '10px', color: '#221a2e' }}>
           ข้อมูลของคุณได้รับการบันทึกแล้ว
         </h4>
-        <p style={{ color: '#6b7280', margin: '0' }}>
+        <p style={{ color: '#6f6a7a', margin: '0' }}>
           คุณสามารถดูข้อมูลทั้งหมดหรือเริ่มการประเมินใหม่ได้
         </p>
       </div>

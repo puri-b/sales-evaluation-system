@@ -332,7 +332,7 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
             type="checkbox"
             checked={localData.return_stapled}
             onChange={(e) => handleInputChange('return_stapled', e.target.checked)}
-            style={{ transform: 'scale(1.3)', accentColor: '#6366f1' }}
+            style={{ transform: 'scale(1.3)', accentColor: '#5b3b8a' }}
           />
           <span style={{ fontWeight: 'bold' }}>การคืนเอกสาร - กรณีเย็บแม็กมา ต้องแม็กคืนเหมือนเดิม</span>
         </label>
@@ -398,7 +398,7 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
                 type="checkbox"
                 checked={localData.is_pc_provided}
                 onChange={(e) => handleInputChange('is_pc_provided', e.target.checked)}
-                style={{ transform: 'scale(1.3)', accentColor: '#6366f1' }}
+                style={{ transform: 'scale(1.3)', accentColor: '#5b3b8a' }}
               />
               <span style={{ fontWeight: 'bold' }}>มีเครื่องคอมพิวเตอร์ให้</span>
             </label>
@@ -410,7 +410,7 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
                 type="checkbox"
                 checked={localData.is_desk_provided}
                 onChange={(e) => handleInputChange('is_desk_provided', e.target.checked)}
-                style={{ transform: 'scale(1.3)', accentColor: '#6366f1' }}
+                style={{ transform: 'scale(1.3)', accentColor: '#5b3b8a' }}
               />
               <span style={{ fontWeight: 'bold' }}>มีโต๊ะ มีเก้าอี้ให้</span>
             </label>
@@ -439,7 +439,7 @@ export default function ScanningForm({ formData, onFormChange, onNext, onBack })
             type="checkbox"
             checked={localData.training_required}
             onChange={(e) => handleInputChange('training_required', e.target.checked)}
-            style={{ transform: 'scale(1.3)', accentColor: '#6366f1' }}
+            style={{ transform: 'scale(1.3)', accentColor: '#5b3b8a' }}
           />
           <span style={{ fontWeight: 'bold' }}>ต้องมีการอบรมก่อนเริ่มงานหรือไม่</span>
         </label>

@@ -247,7 +247,7 @@ export default function DataEntryForm({ formData, onFormChange, onNext, onBack }
             type="checkbox"
             checked={localData.training_required}
             onChange={(e) => handleInputChange('training_required', e.target.checked)}
-            style={{ transform: 'scale(1.3)', accentColor: '#6366f1' }}
+            style={{ transform: 'scale(1.3)', accentColor: '#5b3b8a' }}
           />
           <span style={{ fontWeight: 'bold' }}>ต้องมีการอบรมก่อนเริ่มงานหรือไม่</span>
         </label>

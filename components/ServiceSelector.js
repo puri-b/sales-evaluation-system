@@ -8,7 +8,7 @@ export default function ServiceSelector({ selectedService, onServiceChange }) {
 
   return (
     <div style={{ marginBottom: '26px' }}>
-      <h3 style={{ marginBottom: '15px', color: '#1f2937' }}>เลือกบริการที่ต้องการ</h3>
+      <h3 style={{ marginBottom: '15px', color: '#221a2e' }}>เลือกบริการที่ต้องการ</h3>
       <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
         {services.map(service => {
           const active = selectedService === service.id;
@@ -19,7 +19,7 @@ export default function ServiceSelector({ selectedService, onServiceChange }) {
               style={{ ...glassSelectableCard(active), flex: '1', minWidth: '200px' }}
             >
               <div style={{ fontSize: '48px', marginBottom: '10px' }}>{service.icon}</div>
-              <h4 style={{ color: active ? '#4338ca' : '#1f2937', margin: 0 }}>
+              <h4 style={{ color: active ? '#3d2459' : '#221a2e', margin: 0 }}>
                 {service.name}
               </h4>
             </div>

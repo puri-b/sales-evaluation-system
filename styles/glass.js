@@ -1,217 +1,162 @@
 /**
  * styles/glass.js
  *
- * ชุดสไตล์กลาง "Liquid Glass" (แรงบันดาลใจจาก iOS / macOS)
- * ใช้ร่วมกันทุกหน้าในระบบ เพื่อให้ดีไซน์เป็นภาษาเดียวกันทั้งแอป
- *
- * วิธีใช้:
- *   import { glassPanel, glassCard, glassInput, glassButton, GlassBlobs, hoverLift, hoverReset } from '../styles/glass';
+ * ชุดสไตล์กลางของทั้งแอป — ธีม "เรียบ" (flat) โทนม่วงเข้ม + มิ้นต์
+ * ชื่อ export เดิมยังใช้ได้ทั้งหมด (glassCard, glassButton ฯลฯ) เพื่อไม่ต้องแก้ทุก component
+ * ถ้าจะปรับสีทั้งระบบ ให้แก้ที่ `theme` ด้านล่างจุดเดียว
  */
 
-// พื้นหลังไล่สีพาสเทลหลัก (ใช้เป็น container ใหญ่สุดของแต่ละหน้า)
-export const glassPanel = {
-  position: 'relative',
-  borderRadius: '28px',
-  padding: '26px',
-  overflow: 'hidden',
-  background: 'linear-gradient(135deg, #eef2ff 0%, #f5f0ff 30%, #fdf1f8 60%, #eefcff 100%)',
-  border: '1px solid rgba(255,255,255,0.6)',
-  boxShadow: '0 20px 60px rgba(99,102,241,0.12), inset 0 1px 0 rgba(255,255,255,0.7)',
+export const theme = {
+  bg: '#f5f4f8',
+  surface: '#ffffff',
+  surfaceAlt: '#faf9fc',
+  border: '#e6e3ed',
+  borderStrong: '#d6d1e0',
+  ink: '#221a2e',
+  muted: '#6f6a7a',
+  plum900: '#2a1a3e',
+  plum700: '#3d2459',
+  plum500: '#5b3b8a',
+  plum50: '#f3eff8',
+  mint: '#6ee7d2',
+  mintInk: '#123c35',
+  mintSoft: '#e6faf6',
+  danger: '#c62828',
+  radius: '14px',
 };
 
-// การ์ดกระจกฝ้าโปร่งแสงด้านใน
+// กล่องหลักของแต่ละหน้า (การ์ดขาวขอบบาง)
+export const glassPanel = {
+  position: 'relative',
+  background: theme.surface,
+  border: `1px solid ${theme.border}`,
+  borderRadius: '16px',
+  padding: 'clamp(16px, 4vw, 28px)',
+};
+
+// กล่องย่อยด้านใน — พื้นเทาอ่อน ไม่มีเงา จะได้ไม่เป็น "การ์ดซ้อนการ์ด"
 export const glassCard = {
-  background: 'rgba(255,255,255,0.55)',
-  backdropFilter: 'blur(20px) saturate(180%)',
-  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-  border: '1px solid rgba(255,255,255,0.65)',
-  borderRadius: '20px',
-  boxShadow: '0 8px 32px rgba(31,38,135,0.10)',
+  background: theme.surfaceAlt,
+  border: `1px solid ${theme.border}`,
+  borderRadius: '12px',
   padding: '18px 20px',
   marginBottom: '16px',
 };
 
-// การ์ดกระจกแบบมีสีเน้น (info / success / warning / danger)
 export function glassTint(bg, border, color) {
-  return {
-    ...glassCard,
-    background: bg,
-    border: `1px solid ${border}`,
-    color,
-  };
+  return { ...glassCard, background: bg, border: `1px solid ${border}`, color };
 }
 
-export const glassTintInfo = glassTint('rgba(219,234,254,0.7)', 'rgba(96,165,250,0.4)', '#1e3a8a');
-export const glassTintSuccess = glassTint('rgba(209,250,229,0.7)', 'rgba(16,185,129,0.4)', '#065f46');
-export const glassTintWarning = glassTint('rgba(254,243,199,0.7)', 'rgba(251,191,36,0.4)', '#92400e');
-export const glassTintDanger = glassTint('rgba(254,226,226,0.7)', 'rgba(248,113,113,0.4)', '#991b1b');
+export const glassTintInfo = glassTint('#f3eff8', '#ddd2ec', '#3d2459');
+export const glassTintSuccess = glassTint('#e6faf6', '#bfeee3', '#0f5a4e');
+export const glassTintWarning = glassTint('#fff8e6', '#f3dfa8', '#7a5300');
+export const glassTintDanger = glassTint('#fdecec', '#f1c4c4', '#9b1c1c');
 
-// input / select / textarea กระจกโปร่งแสง
 export const glassInput = {
   width: '100%',
-  padding: '11px 14px',
-  borderRadius: '12px',
-  border: '1px solid rgba(255,255,255,0.8)',
-  background: 'rgba(255,255,255,0.65)',
-  backdropFilter: 'blur(10px)',
-  WebkitBackdropFilter: 'blur(10px)',
+  padding: '10px 12px',
+  borderRadius: '10px',
+  border: `1px solid ${theme.borderStrong}`,
+  background: theme.surface,
   fontSize: '15px',
   outline: 'none',
-  boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.04)',
-  color: '#1f2937',
+  color: theme.ink,
   boxSizing: 'border-box',
+  fontFamily: 'inherit',
 };
 
 export const glassSelect = { ...glassInput, cursor: 'pointer' };
-
-export const glassTextarea = { ...glassInput, resize: 'vertical', fontFamily: 'inherit' };
+export const glassTextarea = { ...glassInput, resize: 'vertical' };
 
 export const glassFileInput = {
   ...glassInput,
-  border: '2px dashed rgba(129,140,248,0.5)',
-  background: 'rgba(255,255,255,0.45)',
+  border: `1px dashed ${theme.borderStrong}`,
+  background: theme.surfaceAlt,
   cursor: 'pointer',
 };
 
 export const glassCheckbox = {
   width: '18px',
   height: '18px',
-  accentColor: '#6366f1',
+  accentColor: theme.plum500,
   cursor: 'pointer',
 };
 
-// ปุ่มกระจกทรงแคปซูล ไล่สีตาม role
-export function glassButton(gradientFrom, gradientTo) {
+// ปุ่มแบบเรียบ: (สีพื้น, สีตัวอักษร, สีขอบ)
+export function glassButton(bg, color = '#fff', border = bg) {
   return {
-    padding: '13px 22px',
-    borderRadius: '999px',
-    border: '1px solid rgba(255,255,255,0.55)',
-    background: `linear-gradient(135deg, ${gradientFrom}, ${gradientTo})`,
-    color: 'white',
+    padding: '11px 18px',
+    borderRadius: '10px',
+    border: `1px solid ${border}`,
+    background: bg,
+    color,
     fontWeight: 600,
-    fontSize: '15px',
+    fontSize: '14px',
+    fontFamily: 'inherit',
     cursor: 'pointer',
-    boxShadow: '0 6px 16px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.4)',
-    backdropFilter: 'blur(10px)',
-    WebkitBackdropFilter: 'blur(10px)',
-    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+    transition: 'filter 0.15s ease',
     whiteSpace: 'nowrap',
   };
 }
 
-// พรีเซ็ตสีปุ่มมาตรฐาน
 export const buttonColors = {
-  primary: ['#60a5fa', '#6366f1'],
-  success: ['#34d399', '#059669'],
-  neutral: ['#94a3b8', '#64748b'],
-  danger: ['#f87171', '#dc2626'],
-  pink: ['#f472b6', '#db2777'],
+  primary: [theme.mint, theme.mintInk, '#5fd9c3'],     // ปุ่มหลัก (มิ้นต์)
+  success: [theme.plum700, '#ffffff', theme.plum700],  // ปุ่มยืนยัน/บันทึก (ม่วงเข้ม)
+  neutral: [theme.surface, '#3a3346', theme.borderStrong], // ปุ่มรอง (ขอบเทา)
+  danger: [theme.surface, theme.danger, '#f1c4c4'],
+  pink: [theme.plum500, '#ffffff', theme.plum500],
 };
 
-export const hoverLift = (e) => {
-  e.currentTarget.style.transform = 'translateY(-2px)';
-  e.currentTarget.style.boxShadow = '0 10px 22px rgba(0,0,0,0.18)';
-};
-export const hoverReset = (e) => {
-  e.currentTarget.style.transform = 'translateY(0)';
-  e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.4)';
-};
+export const hoverLift = (e) => { e.currentTarget.style.filter = 'brightness(0.95)'; };
+export const hoverReset = (e) => { e.currentTarget.style.filter = ''; };
 
-// การ์ดตัวเลือกแบบเลือกได้ (เช่น เลือกบริการ) พร้อมสถานะ active
+// การ์ดเลือกบริการ
 export function glassSelectableCard(active) {
   return {
-    background: active ? 'rgba(99,102,241,0.14)' : 'rgba(255,255,255,0.55)',
-    backdropFilter: 'blur(16px) saturate(180%)',
-    WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-    border: active ? '2px solid rgba(99,102,241,0.6)' : '1px solid rgba(255,255,255,0.65)',
-    borderRadius: '20px',
-    boxShadow: active
-      ? '0 10px 30px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.5)'
-      : '0 6px 20px rgba(31,38,135,0.08)',
-    padding: '22px',
+    background: active ? theme.plum50 : theme.surface,
+    border: active ? `2px solid ${theme.plum500}` : `1px solid ${theme.border}`,
+    borderRadius: theme.radius,
+    padding: active ? '21px' : '22px',
     cursor: 'pointer',
-    transition: 'all 0.25s ease',
+    transition: 'border-color 0.15s ease, background 0.15s ease',
     textAlign: 'center',
   };
 }
 
-// ชิปสถิติเล็กๆ (icon + label + value)
+// ชิปสถิติ (สไตล์การ์ด KPI)
 export const statChipStyle = {
   display: 'flex',
   alignItems: 'center',
-  gap: '10px',
-  background: 'rgba(255,255,255,0.6)',
-  backdropFilter: 'blur(14px)',
-  WebkitBackdropFilter: 'blur(14px)',
-  border: '1px solid rgba(255,255,255,0.7)',
-  borderRadius: '16px',
-  padding: '12px 16px',
-  boxShadow: '0 4px 14px rgba(31,38,135,0.08)',
+  gap: '12px',
+  background: theme.surface,
+  border: `1px solid ${theme.border}`,
+  borderRadius: '12px',
+  padding: '14px 16px',
 };
 
-// pill เล็กสำหรับ header ของบล็อก (ไอคอน + หัวข้อ)
+// หัวข้อบล็อก (ไอคอน + ชื่อ) — แบบเรียบ ไม่มีกรอบ
 export const glassTitlePill = {
   display: 'flex',
   alignItems: 'center',
   gap: '10px',
-  background: 'rgba(255,255,255,0.55)',
-  backdropFilter: 'blur(14px)',
-  WebkitBackdropFilter: 'blur(14px)',
-  border: '1px solid rgba(255,255,255,0.7)',
-  borderRadius: '999px',
-  padding: '8px 18px 8px 14px',
-  boxShadow: '0 4px 14px rgba(31,38,135,0.08)',
+  padding: '4px 0',
+  fontWeight: 600,
+  color: theme.ink,
 };
 
 export const rowStyle = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'flex-start',
-  padding: '9px 0',
-  borderBottom: '1px solid rgba(0,0,0,0.06)',
+  padding: '10px 0',
+  borderBottom: `1px solid ${theme.border}`,
   fontSize: '14px',
   gap: '10px',
 };
 
-// บับเบิ้ลสีเบลอ ใช้แต่งพื้นหลังให้มีมิติแบบ "liquid" — วางไว้ใน container ที่มี position: relative + overflow: hidden
-export function GlassBlobs({ variant = 'default' }) {
-  const variants = {
-    default: [
-      { top: '-60px', right: '-60px', size: 220, color: 'rgba(129,140,248,0.35)' },
-      { bottom: '-80px', left: '-40px', size: 260, color: 'rgba(244,114,182,0.28)' },
-    ],
-    single: [
-      { top: '-60px', right: '-60px', size: 220, color: 'rgba(129,140,248,0.35)' },
-    ],
-    reverse: [
-      { top: '-60px', left: '-60px', size: 220, color: 'rgba(52,211,153,0.3)' },
-      { bottom: '-80px', right: '-40px', size: 260, color: 'rgba(96,165,250,0.28)' },
-    ],
-  };
-  const blobs = variants[variant] || variants.default;
-
-  return (
-    <>
-      {blobs.map((b, i) => (
-        <div
-          key={i}
-          style={{
-            position: 'absolute',
-            top: b.top,
-            right: b.right,
-            bottom: b.bottom,
-            left: b.left,
-            width: `${b.size}px`,
-            height: `${b.size}px`,
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${b.color}, transparent)`,
-            filter: 'blur(10px)',
-            pointerEvents: 'none',
-          }}
-        />
-      ))}
-    </>
-  );
+// เดิมเป็นบับเบิ้ลเบลอ — ธีมเรียบไม่ใช้แล้ว (คงไว้เพื่อไม่ให้ import เดิมพัง)
+export function GlassBlobs() {
+  return null;
 }
 
 export function formatBaht(n) {

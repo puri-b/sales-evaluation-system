@@ -43,7 +43,7 @@ export default function EvaluationList({ onBack, onViewDetail }) {
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '50px' }}>
-        <p style={{ color: '#8b8fa3' }}>กำลังโหลดข้อมูล...</p>
+        <p style={{ color: '#6f6a7a' }}>กำลังโหลดข้อมูล...</p>
       </div>
     );
   }
@@ -76,7 +76,7 @@ export default function EvaluationList({ onBack, onViewDetail }) {
       }}>
         <div style={glassTitlePill}>
           <span style={{ fontSize: '20px' }}>📋</span>
-          <h2 style={{ color: '#1f2937', margin: 0, fontSize: '17px', fontWeight: 700 }}>ข้อมูลการประเมินทั้งหมด</h2>
+          <h2 style={{ color: '#221a2e', margin: 0, fontSize: '17px', fontWeight: 700 }}>ข้อมูลการประเมินทั้งหมด</h2>
         </div>
         <button
           onClick={onBack}
@@ -89,14 +89,14 @@ export default function EvaluationList({ onBack, onViewDetail }) {
       </div>
 
       <div style={{ marginBottom: '20px' }}>
-        <p style={{ color: '#6b7280' }}>
+        <p style={{ color: '#6f6a7a' }}>
           รวมทั้งหมด: <strong>{evaluations.length}</strong> รายการ
         </p>
       </div>
 
       {evaluations.length === 0 ? (
         <div style={{ ...glassCard, textAlign: 'center', padding: '50px' }}>
-          <p style={{ color: '#8b8fa3', margin: 0 }}>ยังไม่มีข้อมูลการประเมิน</p>
+          <p style={{ color: '#6f6a7a', margin: 0 }}>ยังไม่มีข้อมูลการประเมิน</p>
         </div>
       ) : (
         <div style={{ display: 'grid', gap: '15px' }}>
@@ -112,28 +112,28 @@ export default function EvaluationList({ onBack, onViewDetail }) {
                 marginBottom: '15px'
               }}>
                 <div>
-                  <strong style={{ color: '#4338ca' }}>รหัสการประเมิน:</strong>
+                  <strong style={{ color: '#3d2459' }}>รหัสการประเมิน:</strong>
                   <div>#{evaluation.id}</div>
                 </div>
                 <div>
-                  <strong style={{ color: '#4338ca' }}>บริการ:</strong>
+                  <strong style={{ color: '#3d2459' }}>บริการ:</strong>
                   <div>{getServiceName(evaluation.service_type)}</div>
                 </div>
                 <div>
-                  <strong style={{ color: '#4338ca' }}>วันที่ประเมิน:</strong>
+                  <strong style={{ color: '#3d2459' }}>วันที่ประเมิน:</strong>
                   <div>{formatDate(evaluation.evaluation_date)}</div>
                 </div>
                 <div>
-                  <strong style={{ color: '#4338ca' }}>พนักงานขาย:</strong>
+                  <strong style={{ color: '#3d2459' }}>พนักงานขาย:</strong>
                   <div>{evaluation.salesperson_name}</div>
                 </div>
                 <div>
-                  <strong style={{ color: '#4338ca' }}>ลูกค้า:</strong>
+                  <strong style={{ color: '#3d2459' }}>ลูกค้า:</strong>
                   <div>{evaluation.customer_name}</div>
                 </div>
               
                 <div>
-                  <strong style={{ color: '#4338ca' }}>รูปภาพ:</strong>
+                  <strong style={{ color: '#3d2459' }}>รูปภาพ:</strong>
                   <div>{evaluation.image_count} รูป</div>
                 </div>
               </div>

@@ -83,7 +83,7 @@ export default function Summary({
         return (
           <div style={{ gridColumn: '1 / -1' }}>
             <strong>ขนาดเอกสาร:</strong>
-            <div style={{ marginTop: '8px', border: '1px solid rgba(255,255,255,0.7)', borderRadius: '12px', overflow: 'hidden', background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
+            <div style={{ marginTop: '8px', border: '1px solid #e6e3ed', borderRadius: '12px', overflow: 'hidden', background: '#ffffff' }}>
               {validItems.map((item, index) => {
                 const displayType = item.doc_type === 'อื่นๆ' ? item.custom_doc_type || 'อื่นๆ' : item.doc_type;
                 return (
@@ -116,7 +116,7 @@ export default function Summary({
     if (selectedService === 'scanning') {
       return (
         <div>
-          <h4 style={{ marginBottom: '10px', color: '#4338ca' }}>ข้อมูลบริการสแกนเอกสาร</h4>
+          <h4 style={{ marginBottom: '10px', color: '#3d2459' }}>ข้อมูลบริการสแกนเอกสาร</h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '10px' }}>
             <div><strong>จำนวนเอกสารรวม:</strong> {scanningData.doc_count || '-'}</div>
             {renderDocumentSizes()}
@@ -144,7 +144,7 @@ export default function Summary({
     } else if (selectedService === 'data_entry') {
       return (
         <div>
-          <h4 style={{ marginBottom: '10px', color: '#4338ca' }}>ข้อมูลบริการบันทึกข้อมูล</h4>
+          <h4 style={{ marginBottom: '10px', color: '#3d2459' }}>ข้อมูลบริการบันทึกข้อมูล</h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '10px' }}>
             <div><strong>โปรแกรมที่ใช้:</strong> {dataEntryData.software_used || '-'}</div>
             <div><strong>ลักษณะข้อมูล:</strong> {dataEntryData.data_complexity || '-'}</div>
@@ -167,7 +167,7 @@ export default function Summary({
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <h3 style={{ marginBottom: '20px', color: '#1f2937', textAlign: 'center' }}>
+      <h3 style={{ marginBottom: '20px', color: '#221a2e', textAlign: 'center' }}>
         สรุปข้อมูลการประเมิน
       </h3>
       
@@ -178,7 +178,7 @@ export default function Summary({
       )}
       
       <div style={glassCard}>
-        <h4 style={{ marginTop: 0, marginBottom: '10px', color: '#4338ca' }}>ข้อมูลทั่วไป</h4>
+        <h4 style={{ marginTop: 0, marginBottom: '10px', color: '#3d2459' }}>ข้อมูลทั่วไป</h4>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '10px' }}>
           <div><strong>บริการที่เลือก:</strong> {selectedService === 'scanning' ? 'บริการสแกนเอกสาร' : 'บริการบันทึกข้อมูล'}</div>
           <div><strong>วันที่ประเมิน:</strong> {evaluationDate}</div>
@@ -193,7 +193,7 @@ export default function Summary({
 
       {images.length > 0 && (
         <div style={glassCard}>
-          <h4 style={{ marginTop: 0, marginBottom: '10px', color: '#4338ca' }}>รูปภาพประกอบ ({images.length} รูป)</h4>
+          <h4 style={{ marginTop: 0, marginBottom: '10px', color: '#3d2459' }}>รูปภาพประกอบ ({images.length} รูป)</h4>
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', 
@@ -204,12 +204,10 @@ export default function Summary({
                 key={index} 
                 style={{ 
                   textAlign: 'center',
-                  border: '1px solid rgba(255,255,255,0.7)',
+                  border: '1px solid #e6e3ed',
                   borderRadius: '12px',
                   padding: '10px',
-                  background: 'rgba(255,255,255,0.55)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
+                  background: '#ffffff',
                 }}
               >
                 <img
@@ -227,7 +225,7 @@ export default function Summary({
                   onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
                   onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
                 />
-                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '5px', wordBreak: 'break-all' }}>
+                <p style={{ fontSize: '12px', color: '#6f6a7a', marginTop: '5px', wordBreak: 'break-all' }}>
                   {image.name}
                 </p>
               </div>
@@ -279,11 +277,9 @@ export default function Summary({
               position: 'relative',
               maxWidth: '90%',
               maxHeight: '90%',
-              background: 'rgba(255,255,255,0.85)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
+              background: '#ffffff',
               borderRadius: '20px',
-              border: '1px solid rgba(255,255,255,0.6)',
+              border: '1px solid #e6e3ed',
               padding: '20px'
             }}
             onClick={(e) => e.stopPropagation()}

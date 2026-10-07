@@ -8,14 +8,12 @@ const glassSettingInput = {
   width: '150px',
   padding: '9px 12px',
   borderRadius: '12px',
-  border: '1px solid rgba(255,255,255,0.8)',
-  background: 'rgba(255,255,255,0.7)',
-  backdropFilter: 'blur(10px)',
-  WebkitBackdropFilter: 'blur(10px)',
+  border: '1px solid #e6e3ed',
+  background: '#ffffff',
   fontSize: '14px',
   textAlign: 'right',
   outline: 'none',
-  boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.04)',
+  
 };
 
 export default function CostSettingsPage({ onBack }) {
@@ -82,7 +80,7 @@ export default function CostSettingsPage({ onBack }) {
   if (loading) {
     return (
       <div style={glassPanel}>
-        <p style={{ color: '#8b8fa3', margin: 0 }}>กำลังโหลดข้อมูล...</p>
+        <p style={{ color: '#6f6a7a', margin: 0 }}>กำลังโหลดข้อมูล...</p>
       </div>
     );
   }
@@ -102,7 +100,7 @@ export default function CostSettingsPage({ onBack }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
           <div style={glassTitlePill}>
             <span style={{ fontSize: '20px' }}></span>
-            <h2 style={{ color: '#1f2937', margin: 0, fontSize: '17px', fontWeight: 700 }}>ตั้งค่าอัตราต้นทุน (Breakdown Cost)</h2>
+            <h2 style={{ color: '#221a2e', margin: 0, fontSize: '17px', fontWeight: 700 }}>ตั้งค่าอัตราต้นทุน (Breakdown Cost)</h2>
           </div>
           <button
             onClick={onBack}
@@ -114,7 +112,7 @@ export default function CostSettingsPage({ onBack }) {
           </button>
         </div>
 
-        <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '18px' }}>
+        <p style={{ color: '#6f6a7a', fontSize: '14px', marginBottom: '18px' }}>
           ค่าเหล่านี้เป็นอัตรามาตรฐานที่ระบบใช้คำนวณ Breakdown Cost เบื้องต้นให้ทุกรายการประเมิน
           แก้ไขได้ตามนโยบายบริษัทหรือสถานการณ์ปัจจุบัน โดยไม่ต้องแก้โค้ด
         </p>
@@ -128,7 +126,7 @@ export default function CostSettingsPage({ onBack }) {
 
         {Object.entries(groups).map(([groupName, items]) => (
           <div key={groupName} style={glassCard}>
-            <h4 style={{ color: '#3730a3', marginTop: 0, marginBottom: '10px', fontSize: '15px' }}>{groupName}</h4>
+            <h4 style={{ color: '#3d2459', marginTop: 0, marginBottom: '10px', fontSize: '15px' }}>{groupName}</h4>
             {items.map((item) => (
               <div
                 key={item.setting_key}
@@ -143,8 +141,8 @@ export default function CostSettingsPage({ onBack }) {
                 }}
               >
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '14px', color: '#1f2937' }}>{item.label}</div>
-                  <div style={{ fontSize: '12px', color: '#8b8fa3' }}>{item.unit_label}</div>
+                  <div style={{ fontWeight: 600, fontSize: '14px', color: '#221a2e' }}>{item.label}</div>
+                  <div style={{ fontSize: '12px', color: '#6f6a7a' }}>{item.unit_label}</div>
                 </div>
                 <input
                   type="number"

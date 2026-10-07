@@ -69,7 +69,7 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
       const details = evaluation.service_details;
       return (
         <div style={glassCard}>
-          <h4 style={{ color: '#4338ca', marginTop: 0, marginBottom: '10px' }}>รายละเอียดบริการสแกนเอกสาร</h4>
+          <h4 style={{ color: '#3d2459', marginTop: 0, marginBottom: '10px' }}>รายละเอียดบริการสแกนเอกสาร</h4>
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
@@ -102,7 +102,7 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
       return (
         <>
         <div style={glassCard}>
-          <h4 style={{ color: '#4338ca', marginTop: 0, marginBottom: '10px' }}>รายละเอียดบริการบันทึกข้อมูล</h4>
+          <h4 style={{ color: '#3d2459', marginTop: 0, marginBottom: '10px' }}>รายละเอียดบริการบันทึกข้อมูล</h4>
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
@@ -129,7 +129,7 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '50px' }}>
-        <p style={{ color: '#8b8fa3' }}>กำลังโหลดข้อมูล...</p>
+        <p style={{ color: '#6f6a7a' }}>กำลังโหลดข้อมูล...</p>
       </div>
     );
   }
@@ -173,7 +173,7 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
       }}>
         <div style={glassTitlePill}>
           <span style={{ fontSize: '20px' }}>📝</span>
-          <h2 style={{ color: '#1f2937', margin: 0, fontSize: '17px', fontWeight: 700 }}>รายละเอียดการประเมิน</h2>
+          <h2 style={{ color: '#221a2e', margin: 0, fontSize: '17px', fontWeight: 700 }}>รายละเอียดการประเมิน</h2>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button
@@ -196,34 +196,34 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
       </div>
 
       <div style={glassCard}>
-        <h3 style={{ color: '#1f2937', marginTop: 0, marginBottom: '15px' }}>ข้อมูลทั่วไป</h3>
+        <h3 style={{ color: '#221a2e', marginTop: 0, marginBottom: '15px' }}>ข้อมูลทั่วไป</h3>
         <div style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
           gap: '15px' 
         }}>
           <div>
-            <strong style={{ color: '#4338ca' }}>รหัสการประเมิน:</strong>
+            <strong style={{ color: '#3d2459' }}>รหัสการประเมิน:</strong>
             <div>#{evaluation.id}</div>
           </div>
           <div>
-            <strong style={{ color: '#4338ca' }}>บริการ:</strong>
+            <strong style={{ color: '#3d2459' }}>บริการ:</strong>
             <div>{getServiceName(evaluation.service_type)}</div>
           </div>
           <div>
-            <strong style={{ color: '#4338ca' }}>วันที่ประเมิน:</strong>
+            <strong style={{ color: '#3d2459' }}>วันที่ประเมิน:</strong>
             <div>{formatDate(evaluation.evaluation_date)}</div>
           </div>
           <div>
-            <strong style={{ color: '#4338ca' }}>พนักงานขาย:</strong>
+            <strong style={{ color: '#3d2459' }}>พนักงานขาย:</strong>
             <div>{evaluation.salesperson_name}</div>
           </div>
           <div>
-            <strong style={{ color: '#4338ca' }}>ลูกค้า:</strong>
+            <strong style={{ color: '#3d2459' }}>ลูกค้า:</strong>
             <div>{evaluation.customer_name}</div>
           </div>
           <div>
-            <strong style={{ color: '#4338ca' }}>วันที่บันทึก:</strong>
+            <strong style={{ color: '#3d2459' }}>วันที่บันทึก:</strong>
             <div>{formatDate(evaluation.created_at)}</div>
           </div>
         </div>
@@ -237,7 +237,7 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
 
       {evaluation.images && evaluation.images.length > 0 && (
         <div style={glassCard}>
-          <h4 style={{ color: '#4338ca', marginTop: 0, marginBottom: '10px' }}>
+          <h4 style={{ color: '#3d2459', marginTop: 0, marginBottom: '10px' }}>
             รูปภาพประกอบ ({evaluation.images.length} รูป)
           </h4>
           <div style={{ 
@@ -250,12 +250,10 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
                 key={index} 
                 style={{ 
                   textAlign: 'center',
-                  border: '1px solid rgba(255,255,255,0.7)',
+                  border: '1px solid #e6e3ed',
                   borderRadius: '12px',
                   padding: '10px',
-                  background: 'rgba(255,255,255,0.55)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
+                  background: '#ffffff',
                 }}
               >
                 <img
@@ -273,7 +271,7 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
                   onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
                   onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
                 />
-                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '5px' }}>
+                <p style={{ fontSize: '12px', color: '#6f6a7a', marginTop: '5px' }}>
                   รูปภาพที่ {index + 1}
                 </p>
               </div>
@@ -291,8 +289,6 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
             right: 0,
             bottom: 0,
             backgroundColor: 'rgba(0, 0, 0, 0.75)',
-            backdropFilter: 'blur(4px)',
-            WebkitBackdropFilter: 'blur(4px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -305,11 +301,9 @@ export default function EvaluationDetail({ evaluationId, onBack }) {
               position: 'relative',
               maxWidth: '90%',
               maxHeight: '90%',
-              background: 'rgba(255,255,255,0.85)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
+              background: '#ffffff',
               borderRadius: '20px',
-              border: '1px solid rgba(255,255,255,0.6)',
+              border: '1px solid #e6e3ed',
               padding: '20px'
             }}
             onClick={(e) => e.stopPropagation()}
